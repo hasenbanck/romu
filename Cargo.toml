@@ -2,13 +2,12 @@
 name = "romu"
 description = "A pseudo random number generator using the Romu algorithm."
 authors = ["Nils Hasenbanck <nils@hasenbanck.de>"]
-keywords = ["rand", "random", "no-std"]
+keywords = ["rand", "random", "no-std", "#romu"]
 categories = ["algorithms", "no-std"]
 license = "Apache-2.0"
-readme = "../README.md"
+readme = "README.md"
 version = "0.1.0"
 edition = "2021"
-publish = false
 
 [dependencies]
 getrandom = { version = "0.2", optional = true }
