@@ -267,13 +267,9 @@ fn fill_dummy_bytes(slice: &mut [u8]) {
         .for_each(|(i, x)| *x = data[i]);
 }
 
-criterion_group!(benches, bytes);
-
-/*
 #[cfg(feature = "tls")]
 criterion_group!(benches, scalar, range, bytes, tls);
 #[cfg(not(feature = "tls"))]
 criterion_group!(benches, scalar, range, bytes);
-*/
 
 criterion_main!(benches);
