@@ -235,7 +235,7 @@ impl Rng {
     }
 
     /// Creates a new [`Rng`] from the given 64-bit seed.
-    pub const fn from_seed_with_64bit(seed: u64) -> Self {
+    pub fn from_seed_with_64bit(seed: u64) -> Self {
         let seed = split_mix_64(seed);
 
         Self {
@@ -255,7 +255,7 @@ impl Rng {
     ///
     /// # Panics
     /// Panics if all values are zero.
-    pub const fn from_seed_with_192bit(seed: [u64; 3]) -> Self {
+    pub fn from_seed_with_192bit(seed: [u64; 3]) -> Self {
         assert!(seed[0] != 0 && seed[1] != 0 && seed[2] != 0, "seed it zero");
 
         Self {

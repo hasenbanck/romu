@@ -43,7 +43,7 @@ impl Rng128 {
     /// Creates a new [`Rng128`] from the given two 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
+    pub fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
 
@@ -66,7 +66,7 @@ impl Rng128 {
     ///
     /// # Panics
     /// Panics if all values are zero.
-    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 2]) -> Self {
+    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 2]) -> Self {
         assert!(
             seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
             "seed 0 is zero"
@@ -182,7 +182,7 @@ impl Rng256 {
     /// Creates a new [`Rng256`] from the given four 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
+    pub fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
         let lane2 = split_mix_64(seeds[2]);
@@ -207,7 +207,7 @@ impl Rng256 {
     ///
     /// # Panics
     /// Panics if all values are zero.
-    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 4]) -> Self {
+    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 4]) -> Self {
         assert!(
             seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
             "seed 0 is zero"
@@ -341,7 +341,7 @@ impl Rng512 {
     /// Creates a new [`Rng512`] from the given eight 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub const fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
+    pub fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
         let lane2 = split_mix_64(seeds[2]);
@@ -376,7 +376,7 @@ impl Rng512 {
     ///
     /// # Panics
     /// Panics if all values are zero.
-    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 8]) -> Self {
+    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 8]) -> Self {
         assert!(
             seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
             "seed 0 is zero"
