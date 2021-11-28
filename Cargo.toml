@@ -2,7 +2,7 @@
 name = "romu"
 description = "A pseudo random number generator using the Romu algorithm."
 authors = ["Nils Hasenbanck <nils@hasenbanck.de>"]
-keywords = ["rand", "random", "no-std", "#romu"]
+keywords = ["rand", "random", "no-std", "romu"]
 categories = ["algorithms", "no-std"]
 license = "Apache-2.0"
 readme = "README.md"
