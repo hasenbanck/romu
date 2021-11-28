@@ -38,7 +38,7 @@ pub fn seed_with_192bit(seed: [u64; 3]) {
 ///
 /// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
 pub fn mix() {
-    RNG.with(|rng| rng.mix())
+    RNG.mix()
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]

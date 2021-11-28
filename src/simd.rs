@@ -43,7 +43,7 @@ impl Rng128 {
     /// Creates a new [`Rng128`] from the given two 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
+    pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
 
@@ -63,19 +63,7 @@ impl Rng128 {
     ///
     /// # Notice
     /// The variables must be seeded such that at least one bit of state is non-zero.
-    ///
-    /// # Panics
-    /// Panics if all values are zero.
-    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 2]) -> Self {
-        assert!(
-            seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
-            "seed 0 is zero"
-        );
-        assert!(
-            seeds[1][0] != 0 && seeds[1][1] != 0 && seeds[1][2] != 0,
-            "seed 1 is zero"
-        );
-
+    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 2]) -> Self {
         Self {
             x: Simd::from_array([seeds[0][0], seeds[1][0]]),
             y: Simd::from_array([seeds[0][1], seeds[1][1]]),
@@ -182,7 +170,7 @@ impl Rng256 {
     /// Creates a new [`Rng256`] from the given four 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
+    pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
         let lane2 = split_mix_64(seeds[2]);
@@ -204,27 +192,7 @@ impl Rng256 {
     ///
     /// # Notice
     /// The variables must be seeded such that at least one bit of state is non-zero.
-    ///
-    /// # Panics
-    /// Panics if all values are zero.
-    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 4]) -> Self {
-        assert!(
-            seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
-            "seed 0 is zero"
-        );
-        assert!(
-            seeds[1][0] != 0 && seeds[1][1] != 0 && seeds[1][2] != 0,
-            "seed 1 is zero"
-        );
-        assert!(
-            seeds[2][0] != 0 && seeds[2][1] != 0 && seeds[2][2] != 0,
-            "seed 2 is zero"
-        );
-        assert!(
-            seeds[3][0] != 0 && seeds[3][1] != 0 && seeds[3][2] != 0,
-            "seed 3 is zero"
-        );
-
+    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 4]) -> Self {
         Self {
             x: Simd::from_array([seeds[0][0], seeds[1][0], seeds[2][0], seeds[3][0]]),
             y: Simd::from_array([seeds[0][1], seeds[1][1], seeds[2][1], seeds[3][1]]),
@@ -341,7 +309,7 @@ impl Rng512 {
     /// Creates a new [`Rng512`] from the given eight 64-bit seeds.
     ///
     /// The seeds should be from a high entropy source.
-    pub fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
+    pub const fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
         let lane2 = split_mix_64(seeds[2]);
@@ -373,43 +341,7 @@ impl Rng512 {
     ///
     /// # Notice
     /// The variables must be seeded such that at least one bit of state is non-zero.
-    ///
-    /// # Panics
-    /// Panics if all values are zero.
-    pub fn from_seed_with_192bit(seeds: [[u64; 3]; 8]) -> Self {
-        assert!(
-            seeds[0][0] != 0 && seeds[0][1] != 0 && seeds[0][2] != 0,
-            "seed 0 is zero"
-        );
-        assert!(
-            seeds[1][0] != 0 && seeds[1][1] != 0 && seeds[1][2] != 0,
-            "seed 1 is zero"
-        );
-        assert!(
-            seeds[2][0] != 0 && seeds[2][1] != 0 && seeds[2][2] != 0,
-            "seed 2 is zero"
-        );
-        assert!(
-            seeds[3][0] != 0 && seeds[3][1] != 0 && seeds[3][2] != 0,
-            "seed 3 is zero"
-        );
-        assert!(
-            seeds[4][0] != 0 && seeds[4][1] != 0 && seeds[4][2] != 0,
-            "seed 4 is zero"
-        );
-        assert!(
-            seeds[5][0] != 0 && seeds[5][1] != 0 && seeds[5][2] != 0,
-            "seed 5 is zero"
-        );
-        assert!(
-            seeds[6][0] != 0 && seeds[6][1] != 0 && seeds[6][2] != 0,
-            "seed 6 is zero"
-        );
-        assert!(
-            seeds[7][0] != 0 && seeds[7][1] != 0 && seeds[7][2] != 0,
-            "seed 7 is zero"
-        );
-
+    pub const fn from_seed_with_192bit(seeds: [[u64; 3]; 8]) -> Self {
         Self {
             x: Simd::from_array([
                 seeds[0][0],

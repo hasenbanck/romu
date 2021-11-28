@@ -127,7 +127,7 @@ macro_rules! range_integer {
 
 /// Error thrown when no seed could be created from an entropy source.
 #[derive(Clone, PartialEq, Debug)]
-pub struct SeedError(String);
+pub struct SeedError(&'static str);
 
 impl core::fmt::Display for SeedError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -144,7 +144,7 @@ fn generate_seed() -> Result<[u64; 3], SeedError> {
     #[cfg(all(feature = "std", not(feature = "getrandom")))]
     return collect_std_entropy();
     #[cfg(all(not(feature = "std"), not(feature = "getrandom")))]
-    return Err(SeedError("no entropy source available".to_string()));
+    return Err(SeedError("no entropy source available"));
 }
 
 #[cfg(feature = "getrandom")]
@@ -163,10 +163,9 @@ fn collect_getrandom_entropy() -> Result<[u64; 3], SeedError> {
             #[cfg(feature = "std")]
             return collect_std_entropy();
             #[cfg(not(feature = "std"))]
-            return Err(SeedError(format!(
-                "getrandom error and no fallback available: {}",
-                err
-            )));
+            return Err(SeedError(
+                "getrandom error and no fallback available"
+            ));
         }
     }
 }
@@ -235,7 +234,7 @@ impl Rng {
     }
 
     /// Creates a new [`Rng`] from the given 64-bit seed.
-    pub fn from_seed_with_64bit(seed: u64) -> Self {
+    pub const fn from_seed_with_64bit(seed: u64) -> Self {
         let seed = split_mix_64(seed);
 
         Self {
@@ -252,12 +251,7 @@ impl Rng {
     ///
     /// # Notice
     /// The variables must be seeded such that at least one bit of state is non-zero.
-    ///
-    /// # Panics
-    /// Panics if all values are zero.
-    pub fn from_seed_with_192bit(seed: [u64; 3]) -> Self {
-        assert!(seed[0] != 0 && seed[1] != 0 && seed[2] != 0, "seed it zero");
-
+    pub const fn from_seed_with_192bit(seed: [u64; 3]) -> Self {
         Self {
             x: Cell::new(seed[0]),
             y: Cell::new(seed[1]),
