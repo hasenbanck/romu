@@ -6,6 +6,7 @@ keywords = ["rand", "random", "no-std", "#romu"]
 categories = ["algorithms", "no-std"]
 license = "Apache-2.0"
 readme = "README.md"
+documentation = "https://docs.rs/romu"
 version = "0.1.0"
 edition = "2021"
 
