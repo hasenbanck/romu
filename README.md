@@ -4,7 +4,8 @@
 [![Crates.io](https://img.shields.io/crates/v/romu.svg)](https://crates.io/crates/romu)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE-APACHE)
 
-A pseudo random number generator using the algorithm Romu for the programing language Rust.
+A pseudo random number generator using the algorithm [Romu](https://www.romu-random.org/) for the
+programing language Rust.
 
 This pseudo random number generator (PRNG) is not intended for cryptographic purposes. This crate only implements the
 64-bit "RomuTrio" generator, since it's the recommended generator by the original author.
@@ -23,9 +24,9 @@ Following formula is given by the author:
 ```
 
 Example chances for getting a "too small" period:
-    * When 2^62 * 64-bit numbers are needed (32 EiB) -> 2^-122 chance
-    * When 2^39 * 64-bit numbers are needed (4 TiB) -> 2^-146 chance
-    * When 2^36 * 64-bit numbers are needed (512 GiB) -> 2^-149 chance
+ * When 2^62 * 64-bit numbers are needed (32 EiB) -> 2^-122 chance
+ * When 2^39 * 64-bit numbers are needed (4 TiB) -> 2^-146 chance
+ * When 2^36 * 64-bit numbers are needed (512 GiB) -> 2^-149 chance
 
 You can read more about the theory behind Romu in the [official paper](https://arxiv.org/abs/2002.11331) and it's unique
 selling points on the [official website](https://www.romu-random.org/) of the original author.
