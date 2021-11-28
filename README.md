@@ -65,7 +65,7 @@ bytes/Rng512/1048576    time:   [34.794 us 34.853 us 34.917 us]
 
 ## License
 
-Licensed under Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0).
+Licensed under Apache License, Version 2.0, ([LICENSE](LICENSE) or http://www.apache.org/licenses/LICENSE-2.0).
 
 ### Contribution
 
