@@ -203,13 +203,6 @@ pub fn bytes(c: &mut Criterion) {
 
     let mut buffer = vec![0u8; size];
 
-    group.bench_with_input(BenchmarkId::new("Copy", size), &size, |b, &_s| {
-        b.iter(|| fill_dummy_bytes(&mut buffer));
-    });
-    black_box(buffer);
-
-    let mut buffer = vec![0u8; size];
-
     group.bench_with_input(BenchmarkId::new("Rng", size), &size, |b, &_s| {
         b.iter(|| rng.fill_bytes(&mut buffer));
     });
@@ -290,19 +283,6 @@ pub fn tls(c: &mut Criterion) {
     });
 
     group.finish();
-}
-
-fn fill_dummy_bytes(slice: &mut [u8]) {
-    let data = [0u8; 32];
-    let mut chunks = slice.chunks_exact_mut(32);
-    for chunk in &mut chunks {
-        chunk.copy_from_slice(&data)
-    }
-    chunks
-        .into_remainder()
-        .iter_mut()
-        .enumerate()
-        .for_each(|(i, x)| *x = data[i]);
 }
 
 #[cfg(feature = "tls")]
