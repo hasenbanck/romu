@@ -306,7 +306,7 @@ fn fill_dummy_bytes(slice: &mut [u8]) {
 }
 
 #[cfg(feature = "tls")]
-criterion_group!(benches, range);
+criterion_group!(benches, scalar, mod_u, range, bytes, tls);
 #[cfg(not(feature = "tls"))]
 criterion_group!(benches, scalar, mod_u, range, bytes);
 
