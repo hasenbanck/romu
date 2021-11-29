@@ -87,6 +87,44 @@ pub fn scalar(c: &mut Criterion) {
     group.finish();
 }
 
+pub fn mod_u(c: &mut Criterion) {
+    let mut group = c.benchmark_group("mod");
+
+    let rng = Rng::new().unwrap();
+
+    group.bench_function(BenchmarkId::new("u8", ""), |b| {
+        b.iter(|| {
+            black_box(rng.mod_u8(u8::MAX - 1));
+        })
+    });
+
+    group.bench_function(BenchmarkId::new("u16", ""), |b| {
+        b.iter(|| {
+            black_box(rng.mod_u16(u16::MAX - 1));
+        })
+    });
+
+    group.bench_function(BenchmarkId::new("u32", ""), |b| {
+        b.iter(|| {
+            black_box(rng.mod_u32(u32::MAX - 1));
+        })
+    });
+
+    group.bench_function(BenchmarkId::new("u64", ""), |b| {
+        b.iter(|| {
+            black_box(rng.mod_u64(u64::MAX - 1));
+        })
+    });
+
+    group.bench_function(BenchmarkId::new("usize", ""), |b| {
+        b.iter(|| {
+            black_box(rng.mod_usize(usize::MAX - 1));
+        })
+    });
+
+    group.finish();
+}
+
 pub fn range(c: &mut Criterion) {
     let mut group = c.benchmark_group("range");
 
@@ -268,8 +306,8 @@ fn fill_dummy_bytes(slice: &mut [u8]) {
 }
 
 #[cfg(feature = "tls")]
-criterion_group!(benches, scalar, range, bytes, tls);
+criterion_group!(benches, range);
 #[cfg(not(feature = "tls"))]
-criterion_group!(benches, scalar, range, bytes);
+criterion_group!(benches, scalar, mod_u, range, bytes);
 
 criterion_main!(benches);
