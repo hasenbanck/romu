@@ -67,6 +67,7 @@ pub use unstable_tls::*;
 macro_rules! range_integer {
     ($fn:tt, $target:tt, $base:tt, $tmp:tt, $doc:tt) => {
         #[doc = $doc]
+        #[inline(always)]
         pub fn $fn<T: RangeBounds<$target>>(&self, range: T) -> $target {
             let low = match range.start_bound() {
                 Bound::Included(&x) => x,

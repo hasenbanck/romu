@@ -196,60 +196,70 @@ pub fn mod_usize(n: usize) -> usize {
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random u8 value in the given range.
+#[inline(always)]
 pub fn range_u8<T: RangeBounds<u8>>(range: T) -> u8 {
     RNG.with(|rng| rng.range_u8(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random u16 value in the given range.
+#[inline(always)]
 pub fn range_u16<T: RangeBounds<u16>>(range: T) -> u16 {
     RNG.with(|rng| rng.range_u16(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random u32 value in the given range.
+#[inline(always)]
 pub fn range_u32<T: RangeBounds<u32>>(range: T) -> u32 {
     RNG.with(|rng| rng.range_u32(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random u64 value in the given range.
+#[inline(always)]
 pub fn range_u64<T: RangeBounds<u64>>(range: T) -> u64 {
     RNG.with(|rng| rng.range_u64(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random usize value in the given range.
+#[inline(always)]
 pub fn range_usize<T: RangeBounds<usize>>(range: T) -> usize {
     RNG.with(|rng| rng.range_usize(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random i8 value in the given range.
+#[inline(always)]
 pub fn range_i8<T: RangeBounds<i8>>(range: T) -> i8 {
     RNG.with(|rng| rng.range_i8(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random i16 value in the given range.
+#[inline(always)]
 pub fn range_i16<T: RangeBounds<i16>>(range: T) -> i16 {
     RNG.with(|rng| rng.range_i16(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random i32 value in the given range.
+#[inline(always)]
 pub fn range_i32<T: RangeBounds<i32>>(range: T) -> i32 {
     RNG.with(|rng| rng.range_i32(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random i64 value in the given range.
+#[inline(always)]
 pub fn range_i64<T: RangeBounds<i64>>(range: T) -> i64 {
     RNG.with(|rng| rng.range_i64(range))
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random isize value in the given range.
+#[inline(always)]
 pub fn range_isize<T: RangeBounds<isize>>(range: T) -> isize {
     RNG.with(|rng| rng.range_isize(range))
 }
