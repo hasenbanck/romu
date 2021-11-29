@@ -181,7 +181,7 @@ pub fn bytes(c: &mut Criterion) {
     {
         use romu::{Rng128, Rng256, Rng512};
 
-        let mut rng = Rng128::new().unwrap();
+        let rng = Rng128::new().unwrap();
 
         let mut buffer = vec![0u8; size];
 
@@ -190,7 +190,7 @@ pub fn bytes(c: &mut Criterion) {
         });
         black_box(buffer);
 
-        let mut rng = Rng256::new().unwrap();
+        let rng = Rng256::new().unwrap();
 
         let mut buffer = vec![0u8; size];
 
@@ -199,7 +199,7 @@ pub fn bytes(c: &mut Criterion) {
         });
         black_box(buffer);
 
-        let mut rng = Rng512::new().unwrap();
+        let rng = Rng512::new().unwrap();
 
         let mut buffer = vec![0u8; size];
 

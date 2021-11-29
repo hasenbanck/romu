@@ -145,6 +145,56 @@ pub fn fill_bytes(slice: &mut [u8]) {
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Generates a random u8 value in range (0..n).
+///
+/// # Notice
+/// This has a very slight bias. Use [`range_u8()`] instead for no bias.
+#[inline(always)]
+pub fn mod_u8(n: u8) -> u8 {
+    RNG.mod_u8(n)
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Generates a random u16 value in range (0..n).
+///
+/// # Notice
+/// This has a very slight bias. Use [`range_u16()`] instead for no bias.
+#[inline(always)]
+pub fn mod_u16(n: u16) -> u16 {
+    RNG.mod_u16(n)
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Generates a random u32 value in range (0..n).
+///
+/// # Notice
+/// This has a very slight bias. Use [`range_u32()`] instead for no bias.
+#[inline(always)]
+pub fn mod_u32(n: u32) -> u32 {
+    RNG.mod_u32(n)
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Generates a random u64 value in range (0..n).
+///
+/// # Notice
+/// This has a very slight bias. Use [`range_u64()`] instead for no bias.
+#[inline(always)]
+pub fn mod_u64(n: u64) -> u64 {
+    RNG.mod_u64(n)
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Generates a random usize value in range (0..n).
+///
+/// # Notice
+/// This has a very slight bias. Use [`range_usize()`] instead for no bias.
+#[inline(always)]
+pub fn mod_usize(n: usize) -> usize {
+    RNG.mod_usize(n)
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Generates a random u8 value in the given range.
 pub fn range_u8<T: RangeBounds<u8>>(range: T) -> u8 {
     RNG.range_u8(range)

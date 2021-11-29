@@ -103,23 +103,23 @@ macro_rules! range_integer {
             if low == $target::MIN && high == $target::MAX {
                 self.next() as $target
             } else {
-                let s = high.wrapping_sub(low).wrapping_add(1) as $base;
+                let range = high.wrapping_sub(low).wrapping_add(1) as $base;
 
                 // As described in "Fast Random Integer Generation in an Interval" by Daniel Lemire.
                 // <https://arxiv.org/abs/1805.10941>
                 let mut x = self.next() as $base;
-                let mut m = (x as $tmp).wrapping_mul(s as $tmp);
-                let mut l = m as $base;
-                if l < s {
-                    let t = s.wrapping_neg() % s;
-                    while l < t {
+                let mut result = (x as $tmp).wrapping_mul(range as $tmp);
+                let mut leftover = result as $base;
+                if leftover < range {
+                    let threshold = range.wrapping_neg() % range;
+                    while leftover < threshold {
                         x = self.next() as $base;
-                        m = (x as $tmp).wrapping_mul(s as $tmp);
-                        l = m as $base;
+                        result = (x as $tmp).wrapping_mul(range as $tmp);
+                        leftover = result as $base;
                     }
                 }
 
-                low.wrapping_add((m >> (core::mem::size_of::<$base>() * 8)) as $target)
+                low.wrapping_add((result >> (core::mem::size_of::<$base>() * 8)) as $target)
             }
         }
     };
@@ -163,9 +163,7 @@ fn collect_getrandom_entropy() -> Result<[u64; 3], SeedError> {
             #[cfg(feature = "std")]
             return collect_std_entropy();
             #[cfg(not(feature = "std"))]
-            return Err(SeedError(
-                "getrandom error and no fallback available"
-            ));
+            return Err(SeedError("getrandom error and no fallback available"));
         }
     }
 }
@@ -362,31 +360,31 @@ impl Rng {
     /// Generates a random i8 value.
     #[inline(always)]
     pub fn i8(&self) -> i8 {
-        i8::from_ne_bytes(self.u8().to_ne_bytes())
+        self.next() as i8
     }
 
     /// Generates a random i16 value.
     #[inline(always)]
     pub fn i16(&self) -> i16 {
-        i16::from_ne_bytes(self.u16().to_ne_bytes())
+        self.next() as i16
     }
 
     /// Generates a random i32 value.
     #[inline(always)]
     pub fn i32(&self) -> i32 {
-        i32::from_ne_bytes(self.u32().to_ne_bytes())
+        self.next() as i32
     }
 
     /// Generates a random i64 value.
     #[inline(always)]
     pub fn i64(&self) -> i64 {
-        i64::from_ne_bytes(self.u64().to_ne_bytes())
+        self.next() as i64
     }
 
     /// Generates a random isize value.
     #[inline(always)]
     pub fn isize(&self) -> isize {
-        isize::from_ne_bytes(self.usize().to_ne_bytes())
+        self.next() as isize
     }
 
     /// Generates a random bool value.
@@ -430,6 +428,86 @@ impl Rng {
             .into_remainder()
             .iter_mut()
             .for_each(|x| *x = self.next() as u8);
+    }
+
+    /// Generates a random u8 value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_u8()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_u8(&self, n: u8) -> u8 {
+        (self.next() as u8 as u16)
+            .wrapping_mul(n as u16)
+            .wrapping_shr(8) as u8
+    }
+
+    /// Generates a random u16 value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_u16()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_u16(&self, n: u16) -> u16 {
+        (self.next() as u16 as u32)
+            .wrapping_mul(n as u32)
+            .wrapping_shr(16) as u16
+    }
+
+    /// Generates a random u32 value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_u32()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_u32(&self, n: u32) -> u32 {
+        (self.next() as u32 as u64)
+            .wrapping_mul(n as u64)
+            .wrapping_shr(32) as u32
+    }
+
+    /// Generates a random u64 value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_u64()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_u64(&self, n: u64) -> u64 {
+        (self.next() as u64 as u128)
+            .wrapping_mul(n as u128)
+            .wrapping_shr(64) as u64
+    }
+
+    #[cfg(target_pointer_width = "16")]
+    /// Generates a random usize value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_usize()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_usize(&self, n: usize) -> usize {
+        (self.next() as u16 as u32)
+            .wrapping_mul(n as u32)
+            .wrapping_shr(16) as usize
+    }
+
+    #[cfg(target_pointer_width = "32")]
+    /// Generates a random usize value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_usize()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_usize(&self, n: usize) -> usize {
+        (self.next() as u32 as u64)
+            .wrapping_mul(n as u64)
+            .wrapping_shr(32) as usize
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    /// Generates a random usize value in range (0..n).
+    ///
+    /// # Notice
+    /// This has a very slight bias. Use [`Rng::range_usize()`] instead for no bias.
+    #[inline(always)]
+    pub fn mod_usize(&self, n: usize) -> usize {
+        (self.next() as u64 as u128)
+            .wrapping_mul(n as u128)
+            .wrapping_shr(64) as usize
     }
 
     range_integer!(
@@ -580,8 +658,24 @@ mod tests {
 
         let rng = Rng::from_seed_with_192bit([42; 3]);
         rng.mix();
-        assert_eq!(rng.usize(), 3296835985448697058);
-        assert_eq!(rng.usize(), 4696255203626829148);
+        assert_eq!(rng.i8(), -30);
+        assert_eq!(rng.i8(), 92);
+
+        let rng = Rng::from_seed_with_192bit([u64::MAX / 2; 3]);
+        rng.mix();
+        assert_eq!(rng.i16(), 3650);
+        assert_eq!(rng.i16(), 22372);
+        assert_eq!(rng.i16(), -6746);
+
+        let rng = Rng::from_seed_with_192bit([u64::MAX / 3; 3]);
+        rng.mix();
+        assert_eq!(rng.i32(), 682042504);
+        assert_eq!(rng.i32(), -679581114);
+
+        let rng = Rng::from_seed_with_192bit([u64::MAX / 2; 3]);
+        rng.mix();
+        assert_eq!(rng.i64(), 1027424955863928386);
+        assert_eq!(rng.i64(), -947746021273086108);
 
         let rng = Rng::from_seed_with_192bit([42; 3]);
         rng.mix();
@@ -604,6 +698,26 @@ mod tests {
     fn test_range() {
         let rng = Rng::from_seed_with_192bit([42; 3]);
         rng.mix();
+        assert_eq!(rng.mod_u8(128), 113);
+        assert_eq!(rng.mod_u8(128), 46);
+
+        let rng = Rng::from_seed_with_192bit([42; 3]);
+        rng.mix();
+        assert_eq!(rng.mod_u16(128), 126);
+        assert_eq!(rng.mod_u16(128), 98);
+
+        let rng = Rng::from_seed_with_192bit([42; 3]);
+        rng.mix();
+        assert_eq!(rng.mod_u32(128), 65);
+        assert_eq!(rng.mod_u32(128), 105);
+
+        let rng = Rng::from_seed_with_192bit([42; 3]);
+        rng.mix();
+        assert_eq!(rng.mod_u64(128), 22);
+        assert_eq!(rng.mod_u64(128), 32);
+
+        let rng = Rng::from_seed_with_192bit([42; 3]);
+        rng.mix();
         assert_eq!(rng.range_u8(0..128), 113);
         assert_eq!(rng.range_u8(0..128), 46);
 
@@ -621,11 +735,6 @@ mod tests {
         rng.mix();
         assert_eq!(rng.range_u64(0..128), 22);
         assert_eq!(rng.range_u64(0..128), 32);
-
-        let rng = Rng::from_seed_with_192bit([u64::MAX; 3]);
-        rng.mix();
-        assert_eq!(rng.range_usize(0..128), 75);
-        assert_eq!(rng.range_usize(0..128), 99);
 
         let rng = Rng::from_seed_with_192bit([42; 3]);
         rng.mix();
@@ -646,11 +755,6 @@ mod tests {
         rng.mix();
         assert_eq!(rng.range_i64(-64..64), -42);
         assert_eq!(rng.range_i64(-64..64), -32);
-
-        let rng = Rng::from_seed_with_192bit([42; 3]);
-        rng.mix();
-        assert_eq!(rng.range_isize(-64..64), -42);
-        assert_eq!(rng.range_isize(-64..64), -32);
     }
 
     #[test]
