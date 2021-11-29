@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 
+## [0.2.1] - 2020-11-29
+### Updated
+- Always inline range_* function calls.
+
 ## [0.2.0] - 2020-11-29
 ### Updated
 - Changed SIMD types to use inner mutability.
