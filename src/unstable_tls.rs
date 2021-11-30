@@ -1,15 +1,20 @@
 use core::ops::RangeBounds;
 
-use crate::{Rng, SeedError};
+use crate::{Rng, SeedSource};
 
 #[thread_local]
-pub(crate) static RNG: Rng =
-    Rng::from_seed_with_192bit([0x50B88B1357314D73, 0x8E4193B54C35742C, 0x47C6FF4737815FC5]);
+pub(crate) static RNG: Rng = Rng::fixed_tls();
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
-/// Seeds the thread local instance from the best available entropy pool.
-pub fn seed() -> Result<(), SeedError> {
+/// Seeds the thread local instance from the best available randomness source.
+pub fn seed() {
     RNG.seed()
+}
+
+#[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
+/// Shows which source was used to acquire the seed for the thread local instance.
+pub fn seed_source() -> SeedSource {
+    RNG.seed_source()
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
@@ -36,7 +41,7 @@ pub fn seed_with_192bit(seed: [u64; 3]) {
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
 /// Mixes the state, which should improve the quality of the random numbers.
 ///
-/// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
+/// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
 pub fn mix() {
     RNG.mix()
 }
@@ -112,14 +117,14 @@ pub fn isize() -> isize {
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
-/// Generates a random f32 value.
+/// Generates a random f32 value in range (0..1).
 #[inline(always)]
 pub fn f32() -> f32 {
     RNG.f32()
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]
-/// Generates a random f64 value.
+/// Generates a random f64 value in range (0..1).
 #[inline(always)]
 pub fn f64() -> f64 {
     RNG.f64()

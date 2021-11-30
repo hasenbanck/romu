@@ -38,7 +38,7 @@ The crate is `no_std` compatible.
  * `std` - If `getrandom` is not used or returns an error, the generator will use the thread name and the current
            instance time to create a seed value. Enabled by default.
  * `tls` - Creates static functions that use a thread local version of the generator. Enabled by default.
- * `getrandom` - Uses the `getrandom` crate to create a seed of high entropy. Enabled by default.
+ * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call times to the
                     thread local functions greatly. 
  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD versions of the

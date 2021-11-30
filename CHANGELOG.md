@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 
+## [0.3.0] - 2020-11-30
+### Updated
+- Rework the seed generation and make it more consistent.
+- Make the source which was used for the seed generation queryable by the user.
+
 ## [0.2.1] - 2020-11-29
 ### Updated
 - Always inline range_* function calls.

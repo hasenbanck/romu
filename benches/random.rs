@@ -4,7 +4,7 @@ use romu::Rng;
 pub fn scalar(c: &mut Criterion) {
     let mut group = c.benchmark_group("scalar");
 
-    let rng = Rng::new().unwrap();
+    let rng = Rng::new();
 
     group.bench_function(BenchmarkId::new("u8", ""), |b| {
         b.iter(|| {
@@ -90,7 +90,7 @@ pub fn scalar(c: &mut Criterion) {
 pub fn mod_u(c: &mut Criterion) {
     let mut group = c.benchmark_group("mod");
 
-    let rng = Rng::new().unwrap();
+    let rng = Rng::new();
 
     group.bench_function(BenchmarkId::new("u8", ""), |b| {
         b.iter(|| {
@@ -128,7 +128,7 @@ pub fn mod_u(c: &mut Criterion) {
 pub fn range(c: &mut Criterion) {
     let mut group = c.benchmark_group("range");
 
-    let rng = Rng::new().unwrap();
+    let rng = Rng::new();
 
     group.bench_function(BenchmarkId::new("u8", ""), |b| {
         b.iter(|| {
@@ -196,7 +196,7 @@ pub fn range(c: &mut Criterion) {
 pub fn bytes(c: &mut Criterion) {
     let mut group = c.benchmark_group("bytes");
 
-    let rng = Rng::new().unwrap();
+    let rng = Rng::new();
 
     let size = 1024 * 1024; // 1 MiB
     group.throughput(Throughput::Bytes(size as u64));
@@ -212,7 +212,7 @@ pub fn bytes(c: &mut Criterion) {
     {
         use romu::{Rng128, Rng256, Rng512};
 
-        let rng = Rng128::new().unwrap();
+        let rng = Rng128::new();
 
         let mut buffer = vec![0u8; size];
 
@@ -221,7 +221,7 @@ pub fn bytes(c: &mut Criterion) {
         });
         black_box(buffer);
 
-        let rng = Rng256::new().unwrap();
+        let rng = Rng256::new();
 
         let mut buffer = vec![0u8; size];
 
@@ -230,7 +230,7 @@ pub fn bytes(c: &mut Criterion) {
         });
         black_box(buffer);
 
-        let rng = Rng512::new().unwrap();
+        let rng = Rng512::new();
 
         let mut buffer = vec![0u8; size];
 
@@ -247,8 +247,8 @@ pub fn bytes(c: &mut Criterion) {
 pub fn tls(c: &mut Criterion) {
     let mut group = c.benchmark_group("tls");
 
-    let rng = Rng::new().unwrap();
-    romu::seed().unwrap();
+    let rng = Rng::new();
+    romu::seed();
 
     group.bench_function(BenchmarkId::new("u64", "instanced"), |b| {
         b.iter(|| {
@@ -262,8 +262,8 @@ pub fn tls(c: &mut Criterion) {
         })
     });
 
-    let rng = Rng::new().unwrap();
-    romu::seed().unwrap();
+    let rng = Rng::new();
+    romu::seed();
 
     let count = 1024 * 1024;
     group.throughput(Throughput::Bytes(count));

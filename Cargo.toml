@@ -8,7 +8,7 @@ license = "Apache-2.0"
 readme = "README.md"
 documentation = "https://docs.rs/romu"
 repository = "https://github.com/hasenbanck/romu/"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]

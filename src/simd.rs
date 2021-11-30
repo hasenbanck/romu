@@ -4,7 +4,7 @@ use core::{
     simd::{u64x2, u64x4, u64x8, Simd},
 };
 
-use crate::{generate_seed, split_mix_64, SeedError};
+use crate::{generate_seed, split_mix_64, SeedSource};
 
 #[cfg_attr(docsrs, doc(cfg(feature = "unstable_simd")))]
 /// Implements `RomuTrio` with 2 lane SIMD (128-bit).
@@ -12,38 +12,38 @@ pub struct Rng128 {
     x: Cell<u64x2>,
     y: Cell<u64x2>,
     z: Cell<u64x2>,
+    seed_source: Cell<SeedSource>,
 }
 
 impl Rng128 {
-    /// Creates a new [`Rng128`] with a seed from the best available entropy pool.
-    pub fn new() -> Result<Self, SeedError> {
+    /// Creates a new [`Rng128`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
         let rng = Self {
             x: Cell::new(Simd::from_array([0u64; 2])),
             y: Cell::new(Simd::from_array([0u64; 2])),
             z: Cell::new(Simd::from_array([0u64; 2])),
+            seed_source: Cell::new(SeedSource::Fixed),
         };
-        rng.seed()?;
+        rng.seed();
 
-        Ok(rng)
+        rng
     }
 
-    /// Re-seeds the [`Rng128`] from the best available entropy pool.
-    ///
-    /// Returns `False` if no seed with good entropy could be generated.
-    pub fn seed(&self) -> Result<(), SeedError> {
-        let lane0 = generate_seed()?;
-        let lane1 = generate_seed()?;
+    /// Re-seeds the [`Rng128`] from the best available randomness source.
+    pub fn seed(&self) {
+        let memory_address = self as *const _ as u64;
+        let (lane0, _) = generate_seed(memory_address);
+        let (lane1, seed_source) = generate_seed(memory_address.wrapping_add(1));
 
         self.x.set(Simd::from_array([lane0[0], lane1[0]]));
         self.y.set(Simd::from_array([lane0[1], lane1[1]]));
         self.z.set(Simd::from_array([lane0[2], lane1[2]]));
-
-        Ok(())
+        self.seed_source.set(seed_source)
     }
 
     /// Creates a new [`Rng128`] from the given two 64-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
@@ -52,12 +52,13 @@ impl Rng128 {
             x: Cell::new(Simd::from_array([lane0[0], lane1[0]])),
             y: Cell::new(Simd::from_array([lane0[1], lane1[1]])),
             z: Cell::new(Simd::from_array([lane0[2], lane1[2]])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Creates a new [`Rng128`] from the given two 192-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     ///
     /// If the seeds are of low quality, user should call [`Rng128::mix()`] to improve the quality of the
     /// first couple of random numbers.
@@ -69,12 +70,13 @@ impl Rng128 {
             x: Cell::new(Simd::from_array([seeds[0][0], seeds[1][0]])),
             y: Cell::new(Simd::from_array([seeds[0][1], seeds[1][1]])),
             z: Cell::new(Simd::from_array([seeds[0][2], seeds[1][2]])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Mixes the states, which should improve the quality of the random numbers.
     ///
-    /// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
+    /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&self) {
         (0..10).into_iter().for_each(|_| {
             self.next();
@@ -139,29 +141,32 @@ pub struct Rng256 {
     x: Cell<u64x4>,
     y: Cell<u64x4>,
     z: Cell<u64x4>,
+    seed_source: Cell<SeedSource>,
 }
 
 impl Rng256 {
-    /// Creates a new [`Rng256`] with a seed from the best available entropy pool.
-    pub fn new() -> Result<Self, SeedError> {
+    /// Creates a new [`Rng256`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
         let rng = Self {
             x: Cell::new(Simd::from_array([0u64; 4])),
             y: Cell::new(Simd::from_array([0u64; 4])),
             z: Cell::new(Simd::from_array([0u64; 4])),
+            seed_source: Cell::new(SeedSource::Fixed),
         };
-        rng.seed()?;
+        rng.seed();
 
-        Ok(rng)
+        rng
     }
 
-    /// Re-seeds the [`Rng256`] from the best available entropy pool.
+    /// Re-seeds the [`Rng256`] from the best available randomness source.
     ///
-    /// Returns `False` if no seed with good entropy could be generated.
-    pub fn seed(&self) -> Result<(), SeedError> {
-        let lane0 = generate_seed()?;
-        let lane1 = generate_seed()?;
-        let lane2 = generate_seed()?;
-        let lane3 = generate_seed()?;
+    /// Returns `False` if no seed with good randomness could be generated.
+    pub fn seed(&self) {
+        let memory_address = self as *const _ as u64;
+        let (lane0, _) = generate_seed(memory_address);
+        let (lane1, _) = generate_seed(memory_address.wrapping_add(1));
+        let (lane2, _) = generate_seed(memory_address.wrapping_add(2));
+        let (lane3, seed_source) = generate_seed(memory_address.wrapping_add(3));
 
         self.x
             .set(Simd::from_array([lane0[0], lane1[0], lane2[0], lane3[0]]));
@@ -169,13 +174,12 @@ impl Rng256 {
             .set(Simd::from_array([lane0[1], lane1[1], lane2[1], lane3[1]]));
         self.z
             .set(Simd::from_array([lane0[2], lane1[2], lane2[2], lane3[2]]));
-
-        Ok(())
+        self.seed_source.set(seed_source)
     }
 
     /// Creates a new [`Rng256`] from the given four 64-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     pub const fn from_seed_with_64bit(seeds: [u64; 4]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
@@ -186,12 +190,13 @@ impl Rng256 {
             x: Cell::new(Simd::from_array([lane0[0], lane1[0], lane2[0], lane3[0]])),
             y: Cell::new(Simd::from_array([lane0[1], lane1[1], lane2[1], lane3[1]])),
             z: Cell::new(Simd::from_array([lane0[2], lane1[2], lane2[2], lane3[2]])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Creates a new [`Rng256`] from the given four 192-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     ///
     /// If the seeds are of low quality, user should call [`Rng256::mix()`] to improve the quality of the
     /// first couple of random numbers.
@@ -218,12 +223,13 @@ impl Rng256 {
                 seeds[2][2],
                 seeds[3][2],
             ])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Mixes the states, which should improve the quality of the random numbers.
     ///
-    /// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
+    /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&self) {
         (0..10).into_iter().for_each(|_| {
             self.next();
@@ -288,33 +294,34 @@ pub struct Rng512 {
     x: Cell<u64x8>,
     y: Cell<u64x8>,
     z: Cell<u64x8>,
+    seed_source: Cell<SeedSource>,
 }
 
 impl Rng512 {
-    /// Creates a new [`Rng512`] with a seed from the best available entropy pool.
-    pub fn new() -> Result<Self, SeedError> {
+    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
         let rng = Self {
             x: Cell::new(Simd::from_array([0u64; 8])),
             y: Cell::new(Simd::from_array([0u64; 8])),
             z: Cell::new(Simd::from_array([0u64; 8])),
+            seed_source: Cell::new(SeedSource::Fixed),
         };
-        rng.seed()?;
+        rng.seed();
 
-        Ok(rng)
+        rng
     }
 
-    /// Re-seeds the [`Rng512`] from the best available entropy pool.
-    ///
-    /// Returns `False` if no seed with good entropy could be generated.
-    pub fn seed(&self) -> Result<(), SeedError> {
-        let lane0 = generate_seed()?;
-        let lane1 = generate_seed()?;
-        let lane2 = generate_seed()?;
-        let lane3 = generate_seed()?;
-        let lane4 = generate_seed()?;
-        let lane5 = generate_seed()?;
-        let lane6 = generate_seed()?;
-        let lane7 = generate_seed()?;
+    /// Re-seeds the [`Rng512`] from the best available randomness source.
+    pub fn seed(&self) {
+        let memory_address = self as *const _ as u64;
+        let (lane0, _) = generate_seed(memory_address);
+        let (lane1, _) = generate_seed(memory_address.wrapping_add(1));
+        let (lane2, _) = generate_seed(memory_address.wrapping_add(2));
+        let (lane3, _) = generate_seed(memory_address.wrapping_add(3));
+        let (lane4, _) = generate_seed(memory_address.wrapping_add(4));
+        let (lane5, _) = generate_seed(memory_address.wrapping_add(5));
+        let (lane6, _) = generate_seed(memory_address.wrapping_add(6));
+        let (lane7, seed_source) = generate_seed(memory_address.wrapping_add(7));
 
         self.x.set(Simd::from_array([
             lane0[0], lane1[0], lane2[0], lane3[0], lane4[0], lane5[0], lane6[0], lane7[0],
@@ -325,13 +332,12 @@ impl Rng512 {
         self.z.set(Simd::from_array([
             lane0[2], lane1[2], lane2[2], lane3[2], lane4[2], lane5[2], lane6[2], lane7[2],
         ]));
-
-        Ok(())
+        self.seed_source.set(seed_source)
     }
 
     /// Creates a new [`Rng512`] from the given eight 64-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     pub const fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
         let lane0 = split_mix_64(seeds[0]);
         let lane1 = split_mix_64(seeds[1]);
@@ -352,12 +358,13 @@ impl Rng512 {
             z: Cell::new(Simd::from_array([
                 lane0[2], lane1[2], lane2[2], lane3[2], lane4[2], lane5[2], lane6[2], lane7[2],
             ])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Creates a new [`Rng512`] from the given four 192-bit seeds.
     ///
-    /// The seeds should be from a high entropy source.
+    /// The seeds should be from a high randomness source.
     ///
     /// If the seeds are of low quality, user should call [`Rng512::mix()`] to improve the quality of the
     /// first couple of random numbers.
@@ -396,12 +403,13 @@ impl Rng512 {
                 seeds[6][2],
                 seeds[7][2],
             ])),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
     /// Mixes the states, which should improve the quality of the random numbers.
     ///
-    /// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
+    /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&self) {
         (0..10).into_iter().for_each(|_| {
             self.next();

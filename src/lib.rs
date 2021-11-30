@@ -23,21 +23,44 @@
 //!   * When 2^39 * 64 bit numbers are needed (4 TiB) -> 2^-146 chance
 //!   * When 2^36 * 64 bit numbers are needed (512 GiB) -> 2^-149 chance
 //!
-//! You can read more about the theory behind Romu in the [official paper](https://arxiv.org/abs/2002.11331) and it's unique
-//! selling points on the [official website](https://www.romu-random.org/) of the original author.
+//! You can read more about the theory behind Romu in the [official paper](https://arxiv.org/abs/2002.11331)
+//! and it's unique selling points on the [official website](https://www.romu-random.org/) of the
+//! original author.
+//!
+//! ## Seeding
+//!
+//! When the user calls the `new()` or `default()` functions of a generator, the implementation
+//! tries to use the best available randomness source to seed the generator (in the following order):
+//!  1. The crate `getrandom` to seed from a high quality randomness source of the operating system.
+//!     The feature `getrandom` must be activated for this.
+//!  2. Use the functionality of the standard library to create a low quality randomness seed (using
+//!     the current time, the thread ID and a memory address).
+//!     The feature `std` must be activated for this.
+//!  3. Use a memory address as a very low randomness seed. If Address Space Layout Randomization
+//!     (ASLR) is supported by the operating system, this should be a pretty "random" value.
+//!
+//! It is highly recommended to use the `no_std` compatible `getrandom` feature to get high quality
+//! randomness seeds.
+//!
+//! The user can always create / update a generator with a user provided seed value.
+//!
+//! If the `tls` feature is used, the user _should_ call the [`seed()`] function to seed the TLS
+//! before creating the first random numbers, since the TLS instance is instantiated with a fixed
+//! value.
 //!
 //! ## Features
 //!
 //! The crate is `no_std` compatible.
 //!
-//!  * `std` - If `getrandom` is not used or returns an error, the generator will use the thread name and the current
-//!            instance time to create a seed value. Enabled by default.
+//!  * `std` - If `getrandom` is not used or returns an error, the generator will use the thread
+//!            name and the current instance time to create a seed value. Enabled by default.
 //!  * `tls` - Create static functions to use a thread local version of the generator. Enabled by default.
-//!  * `getrandom` - Uses the `getrandom` crate to create a seed of high entropy. Enabled by default.
-//!  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call times to the
-//!                     thread local functions greatly.
-//!  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD versions of the
-//!                      generator which can be used to create large amount of random data fast.
+//!  * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
+//!  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call
+//!                     times to the thread local functions greatly.
+//!  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD
+//!                      versions of the generator which can be used to create large amount of
+//!                      random data fast.
 #![warn(missing_docs)]
 #![deny(clippy::unwrap_used)]
 #![cfg_attr(feature = "unstable_tls", feature(thread_local))]
@@ -126,51 +149,60 @@ macro_rules! range_integer {
     };
 }
 
-/// Error thrown when no seed could be created from an entropy source.
-#[derive(Clone, PartialEq, Debug)]
-pub struct SeedError(&'static str);
-
-impl core::fmt::Display for SeedError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "can't create seed: {}", &self.0)
-    }
+/// Defines which source the seed was created from.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[allow(unused)]
+pub enum SeedSource {
+    /// The crate `getrandom` was used to create the seed from a high quality randomness source
+    /// of the operating system.
+    GetRandom,
+    /// The standard library was used to get a low quality randomness seed from three sources:
+    /// 1. Hash of the current time instance.
+    /// 2. Hashed thread ID.
+    /// 3. Memory Address.
+    Std,
+    /// Use a static memory address as a low randomness seed. If Address Space Layout Randomization
+    /// (ASLR) is supported by the operating system, this should be a pretty "random" value.
+    MemoryAddress,
+    /// Seed was provided by the user.
+    User,
+    /// Fixed value by the implementation.
+    Fixed,
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for SeedError {}
-
-fn generate_seed() -> Result<[u64; 3], SeedError> {
+fn generate_seed(memory_address: u64) -> ([u64; 3], SeedSource) {
     #[cfg(feature = "getrandom")]
-    return collect_getrandom_entropy();
+    return collect_getrandom_randomness(memory_address);
     #[cfg(all(feature = "std", not(feature = "getrandom")))]
-    return collect_std_entropy();
+    return collect_std_randomness(memory_address);
     #[cfg(all(not(feature = "std"), not(feature = "getrandom")))]
-    return Err(SeedError("no entropy source available"));
+    return collect_memory_address_randomness(memory_address);
 }
 
 #[cfg(feature = "getrandom")]
 #[allow(unused_variables)]
-fn collect_getrandom_entropy() -> Result<[u64; 3], SeedError> {
+fn collect_getrandom_randomness(memory_address: u64) -> ([u64; 3], SeedSource) {
     let mut b = [0u8; 24];
     match getrandom::getrandom(&mut b) {
-        Ok(_) => Ok([
-            // Full 192 bit state from high quality source.
-            u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]),
-            u64::from_be_bytes([b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]]),
-            u64::from_be_bytes([b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23]]),
-        ]),
-        Err(err) => {
-            // Reduced 64 bit state from low quality source as fallback.
+        Ok(_) => (
+            [
+                u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]),
+                u64::from_be_bytes([b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]]),
+                u64::from_be_bytes([b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23]]),
+            ],
+            SeedSource::GetRandom,
+        ),
+        Err(_) => {
             #[cfg(feature = "std")]
-            return collect_std_entropy();
+            return collect_std_randomness(memory_address);
             #[cfg(not(feature = "std"))]
-            return Err(SeedError("getrandom error and no fallback available"));
+            return collect_memory_address_randomness(memory_address);
         }
     }
 }
 
 #[cfg(feature = "std")]
-fn collect_std_entropy() -> Result<[u64; 3], SeedError> {
+fn collect_std_randomness(memory_address: u64) -> ([u64; 3], SeedSource) {
     use std::{
         collections::hash_map::DefaultHasher,
         hash::{Hash, Hasher},
@@ -180,16 +212,27 @@ fn collect_std_entropy() -> Result<[u64; 3], SeedError> {
 
     let mut hasher = DefaultHasher::new();
     Instant::now().hash(&mut hasher);
-    thread::current().id().hash(&mut hasher);
+    let (first, _) = split_mix_64_round(hasher.finish());
 
-    Ok(split_mix_64(hasher.finish()))
+    let mut hasher = DefaultHasher::new();
+    thread::current().id().hash(&mut hasher);
+    let (second, _) = split_mix_64_round(hasher.finish());
+    let (third, _) = split_mix_64_round(memory_address);
+
+    ([first, second, third], SeedSource::Std)
+}
+
+#[cfg(not(feature = "std"))]
+fn collect_memory_address_randomness(memory_address: u64) -> ([u64; 3], SeedSource) {
+    let seed = split_mix_64(memory_address);
+    (seed, SeedSource::MemoryAddress)
 }
 
 // We use `SplitMix64` to "improve" the seed as suggested by the author of Romu.
 const fn split_mix_64(state: u64) -> [u64; 3] {
-    let (x, state) = split_mix_64_inner(state);
-    let (y, state) = split_mix_64_inner(state);
-    let (z, _) = split_mix_64_inner(state);
+    let (x, state) = split_mix_64_round(state);
+    let (y, state) = split_mix_64_round(state);
+    let (z, _) = split_mix_64_round(state);
 
     [x, y, z]
 }
@@ -201,13 +244,13 @@ const fn split_mix_64(state: u64) -> [u64; 3] {
 /// worldwide. This software is distributed without any warranty.
 ///
 /// See <http://creativecommons.org/publicdomain/zero/1.0/>.
-const fn split_mix_64_inner(mut state: u64) -> (u64, u64) {
-    state += 0x9E3779B97F4A7C15;
+const fn split_mix_64_round(mut state: u64) -> (u64, u64) {
+    state = state.wrapping_add(0x9E3779B97F4A7C15);
 
     let mut z = state;
-    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
-    z = (z ^ (z >> 27)) * 0x94D049BB133111EB;
-    z = z ^ (z >> 31);
+    z = (z ^ (z.wrapping_shr(30))).wrapping_mul(0xBF58476D1CE4E5B9);
+    z = (z ^ (z.wrapping_shr(27))).wrapping_mul(0x94D049BB133111EB);
+    z = z ^ (z.wrapping_shr(31));
 
     (z, state)
 }
@@ -217,19 +260,38 @@ pub struct Rng {
     x: Cell<u64>,
     y: Cell<u64>,
     z: Cell<u64>,
+    seed_source: Cell<SeedSource>,
 }
 
-impl Rng {
-    /// Creates a new [`Rng`] with a seed from the best available entropy pool.
-    pub fn new() -> Result<Self, SeedError> {
+impl Default for Rng {
+    fn default() -> Self {
         let rng = Self {
             x: Cell::new(0),
             y: Cell::new(0),
             z: Cell::new(0),
+            seed_source: Cell::new(SeedSource::Fixed),
         };
-        rng.seed()?;
+        rng.seed();
 
-        Ok(rng)
+        rng
+    }
+}
+
+impl Rng {
+    /// Creates a new [`Rng`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    #[cfg(any(feature = "tls", feature = "unstable_tls"))]
+    /// Creates a fixed value to initialize the TLS.
+    pub(crate) const fn fixed_tls() -> Self {
+        Self {
+            x: Cell::new(0xad9da80ff4906d64),
+            y: Cell::new(0xd90576ebc62161ca),
+            z: Cell::new(0xbf0f8ca2e79b4817),
+            seed_source: Cell::new(SeedSource::Fixed),
+        }
     }
 
     /// Creates a new [`Rng`] from the given 64-bit seed.
@@ -240,6 +302,7 @@ impl Rng {
             x: Cell::new(seed[0] | 1),
             y: Cell::new(seed[1] | 1),
             z: Cell::new(seed[2] | 1),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
@@ -255,28 +318,34 @@ impl Rng {
             x: Cell::new(seed[0]),
             y: Cell::new(seed[1]),
             z: Cell::new(seed[2]),
+            seed_source: Cell::new(SeedSource::User),
         }
     }
 
-    /// Re-seeds the [`Rng`] from the best available entropy pool.
-    ///
-    /// Returns `False` if no seed with good entropy could be generated.
-    pub fn seed(&self) -> Result<(), SeedError> {
-        let seed = generate_seed()?;
-        self.x.set(seed[0]);
-        self.y.set(seed[1]);
-        self.z.set(seed[2]);
+    /// Shows which source was used to acquire the seed.
+    pub fn seed_source(&self) -> SeedSource {
+        self.seed_source.get()
+    }
 
-        Ok(())
+    /// Re-seeds the [`Rng`] from the best available randomness source.
+    pub fn seed(&self) {
+        let memory_address = self as *const _ as u64;
+
+        let (seed, seed_source) = generate_seed(memory_address);
+        self.x.set(seed[0] | 1);
+        self.y.set(seed[1] | 1);
+        self.z.set(seed[2] | 1);
+        self.seed_source.set(seed_source)
     }
 
     /// Re-seeds the [`Rng`] with the given 64-bit seed.
     pub fn seed_with_64bit(&self, seed: u64) {
         let seed = split_mix_64(seed);
 
-        self.x.set(seed[0]);
-        self.y.set(seed[1]);
-        self.z.set(seed[2]);
+        self.x.set(seed[0] | 1);
+        self.y.set(seed[1] | 1);
+        self.z.set(seed[2] | 1);
+        self.seed_source.set(SeedSource::User)
     }
 
     /// Re-seeds the [`Rng`] from the given 192-bit seed.
@@ -286,20 +355,16 @@ impl Rng {
     ///
     /// # Notice
     /// The variables must be seeded such that at least one bit of state is non-zero.
-    ///
-    /// # Panics
-    /// Panics if all values are zero.
     pub fn seed_with_192bit(&self, seed: [u64; 3]) {
-        assert!(seed[0] != 0 && seed[1] != 0 && seed[2] != 0, "seed is zero");
-
         self.x.set(seed[0]);
         self.y.set(seed[1]);
         self.z.set(seed[2]);
+        self.seed_source.set(SeedSource::User)
     }
 
     /// Mixes the state, which should improve the quality of the random numbers.
     ///
-    /// Should be called when having (re-)seeded the generator with a fixed value of low entropy.
+    /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&self) {
         (0..10).into_iter().for_each(|_| {
             self.next();
