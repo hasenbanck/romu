@@ -251,6 +251,10 @@ const fn split_mix_64(state: u64) -> [u64; 3] {
     let (y, state) = split_mix_64_round(state);
     let (z, _) = split_mix_64_round(state);
 
+    let x = if x == 0 { 1 } else { x };
+    let y = if y == 0 { 1 } else { y };
+    let z = if z == 0 { 1 } else { z };
+
     [x, y, z]
 }
 
@@ -316,9 +320,9 @@ impl Rng {
         let seed = split_mix_64(seed);
 
         Self {
-            x: Cell::new(seed[0] | 1),
-            y: Cell::new(seed[1] | 1),
-            z: Cell::new(seed[2] | 1),
+            x: Cell::new(seed[0]),
+            y: Cell::new(seed[1]),
+            z: Cell::new(seed[2]),
             seed_source: Cell::new(SeedSource::User),
         }
     }
@@ -349,9 +353,9 @@ impl Rng {
         let memory_address = self as *const _ as u64;
 
         let (seed, seed_source) = generate_seed(memory_address);
-        self.x.set(seed[0] | 1);
-        self.y.set(seed[1] | 1);
-        self.z.set(seed[2] | 1);
+        self.x.set(seed[0]);
+        self.y.set(seed[1]);
+        self.z.set(seed[2]);
         self.seed_source.set(seed_source)
     }
 
@@ -359,9 +363,9 @@ impl Rng {
     pub fn seed_with_64bit(&self, seed: u64) {
         let seed = split_mix_64(seed);
 
-        self.x.set(seed[0] | 1);
-        self.y.set(seed[1] | 1);
-        self.z.set(seed[2] | 1);
+        self.x.set(seed[0]);
+        self.y.set(seed[1]);
+        self.z.set(seed[2]);
         self.seed_source.set(SeedSource::User)
     }
 
@@ -860,5 +864,88 @@ mod tests {
         rng.fill_bytes(&mut bytes);
 
         assert_ne!(org_bytes, bytes);
+    }
+
+    #[test]
+    fn test_rng128() {
+        let mut rng = Rng128::from_seed_with_64bit([42, 43]);
+        rng.mix();
+
+        let rng0 = Rng::from_seed_with_64bit(42);
+        rng0.mix();
+
+        let rng1 = Rng::from_seed_with_64bit(43);
+        rng1.mix();
+
+        let res = rng.u64x2();
+
+        assert_eq!(res[0], rng0.u64());
+        assert_eq!(res[1], rng1.u64());
+    }
+
+    #[test]
+    fn test_rng256() {
+        let mut rng = Rng256::from_seed_with_64bit([42, 43, 44, 45]);
+        rng.mix();
+
+        let rng0 = Rng::from_seed_with_64bit(42);
+        rng0.mix();
+
+        let rng1 = Rng::from_seed_with_64bit(43);
+        rng1.mix();
+
+        let rng2 = Rng::from_seed_with_64bit(44);
+        rng2.mix();
+
+        let rng3 = Rng::from_seed_with_64bit(45);
+        rng3.mix();
+
+        let res = rng.u64x4();
+
+        assert_eq!(res[0], rng0.u64());
+        assert_eq!(res[1], rng1.u64());
+        assert_eq!(res[2], rng2.u64());
+        assert_eq!(res[3], rng3.u64());
+    }
+
+    #[test]
+    fn test_rng512() {
+        let mut rng = Rng512::from_seed_with_64bit([42, 43, 44, 45, 46, 47, 48, 49]);
+        rng.mix();
+
+        let rng0 = Rng::from_seed_with_64bit(42);
+        rng0.mix();
+
+        let rng1 = Rng::from_seed_with_64bit(43);
+        rng1.mix();
+
+        let rng2 = Rng::from_seed_with_64bit(44);
+        rng2.mix();
+
+        let rng3 = Rng::from_seed_with_64bit(45);
+        rng3.mix();
+
+        let rng4 = Rng::from_seed_with_64bit(46);
+        rng4.mix();
+
+        let rng5 = Rng::from_seed_with_64bit(47);
+        rng5.mix();
+
+        let rng6 = Rng::from_seed_with_64bit(48);
+        rng6.mix();
+
+        let rng7 = Rng::from_seed_with_64bit(49);
+        rng7.mix();
+
+        let res = rng.u64x8();
+
+        assert_eq!(res[0], rng0.u64());
+        assert_eq!(res[1], rng1.u64());
+        assert_eq!(res[2], rng2.u64());
+        assert_eq!(res[3], rng3.u64());
+        assert_eq!(res[4], rng4.u64());
+        assert_eq!(res[5], rng5.u64());
+        assert_eq!(res[6], rng6.u64());
+        assert_eq!(res[7], rng7.u64());
     }
 }
