@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 
+## [0.4.0] - 2020-12-01
+### Updated
+- Remove inner mutability for SIMD types to support stable SIMD.
+
+### Added
+- Support stable SIMD using auto-vectorization.
+
 ## [0.3.0] - 2020-11-30
 ### Updated
 - Rework the seed generation and make it more consistent.

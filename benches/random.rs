@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use romu::Rng;
+use romu::{Rng, Rng128, Rng256, Rng512};
 
 pub fn scalar(c: &mut Criterion) {
     let mut group = c.benchmark_group("scalar");
@@ -208,37 +208,32 @@ pub fn bytes(c: &mut Criterion) {
     });
     black_box(buffer);
 
-    #[cfg(feature = "unstable_simd")]
-    {
-        use romu::{Rng128, Rng256, Rng512};
+    let mut rng = Rng128::new();
 
-        let rng = Rng128::new();
+    let mut buffer = vec![0u8; size];
 
-        let mut buffer = vec![0u8; size];
+    group.bench_with_input(BenchmarkId::new("Rng128", size), &size, |b, &_s| {
+        b.iter(|| rng.fill_bytes(&mut buffer));
+    });
+    black_box(buffer);
 
-        group.bench_with_input(BenchmarkId::new("Rng128", size), &size, |b, &_s| {
-            b.iter(|| rng.fill_bytes(&mut buffer));
-        });
-        black_box(buffer);
+    let mut rng = Rng256::new();
 
-        let rng = Rng256::new();
+    let mut buffer = vec![0u8; size];
 
-        let mut buffer = vec![0u8; size];
+    group.bench_with_input(BenchmarkId::new("Rng256", size), &size, |b, &_s| {
+        b.iter(|| rng.fill_bytes(&mut buffer));
+    });
+    black_box(buffer);
 
-        group.bench_with_input(BenchmarkId::new("Rng256", size), &size, |b, &_s| {
-            b.iter(|| rng.fill_bytes(&mut buffer));
-        });
-        black_box(buffer);
+    let mut rng = Rng512::new();
 
-        let rng = Rng512::new();
+    let mut buffer = vec![0u8; size];
 
-        let mut buffer = vec![0u8; size];
-
-        group.bench_with_input(BenchmarkId::new("Rng512", size), &size, |b, &_s| {
-            b.iter(|| rng.fill_bytes(&mut buffer));
-        });
-        black_box(buffer);
-    }
+    group.bench_with_input(BenchmarkId::new("Rng512", size), &size, |b, &_s| {
+        b.iter(|| rng.fill_bytes(&mut buffer));
+    });
+    black_box(buffer);
 
     group.finish();
 }

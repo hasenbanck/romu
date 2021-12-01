@@ -39,7 +39,7 @@
 //!  3. Use a memory address as a very low randomness seed. If Address Space Layout Randomization
 //!     (ASLR) is supported by the operating system, this should be a pretty "random" value.
 //!
-//! It is highly recommended to use the `no_std` compatible `getrandom` feature to get high quality
+//! It is highly recommended using the `no_std` compatible `getrandom` feature to get high quality
 //! randomness seeds.
 //!
 //! The user can always create / update a generator with a user provided seed value.
@@ -47,6 +47,19 @@
 //! If the `tls` feature is used, the user _should_ call the [`seed()`] function to seed the TLS
 //! before creating the first random numbers, since the TLS instance is instantiated with a fixed
 //! value.
+//!
+//! ## SIMD
+//!
+//! The crate currently provides three generators that tries to use auto vectorization to speed up
+//! the generation of large amounts of random numbers.
+//!
+//!  * `Rng128` - This should be used when the processor has access to 128-bit SIMD (SSE2 / NEON).
+//!  * `Rng256` - This should be used when the processor has access to 256-bit SIMD (AVX2).
+//!  * `Rng512` - This should be used when the processor has access to 512-bit SIMD (AVX512).
+//!
+//! The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD.
+//! Users should test the available generators for their workload and verify if they can accelerate
+//! them using the SIMD functionality.
 //!
 //! ## Features
 //!
@@ -58,7 +71,7 @@
 //!  * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
 //!  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call
 //!                     times to the thread local functions greatly.
-//!  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD
+//!  * `unstable_simd` - Uses the unstable `core::simd` crate of Rust nightly to provide special SIMD
 //!                      versions of the generator which can be used to create large amount of
 //!                      random data fast.
 #![warn(missing_docs)]
@@ -68,10 +81,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-#[cfg(feature = "unstable_simd")]
-mod simd;
+#[cfg(not(feature = "unstable_simd"))]
+mod stable_simd;
 #[cfg(all(feature = "tls", not(feature = "unstable_tls")))]
 mod stable_tls;
+#[cfg(feature = "unstable_simd")]
+mod unstable_simd;
 #[cfg(all(feature = "tls", feature = "unstable_tls"))]
 mod unstable_tls;
 
@@ -80,10 +95,12 @@ use core::{
     ops::{Bound, RangeBounds},
 };
 
-#[cfg(feature = "unstable_simd")]
-pub use simd::*;
+#[cfg(not(feature = "unstable_simd"))]
+pub use stable_simd::*;
 #[cfg(all(feature = "tls", not(feature = "unstable_tls")))]
 pub use stable_tls::*;
+#[cfg(feature = "unstable_simd")]
+pub use unstable_simd::*;
 #[cfg(all(feature = "tls", feature = "unstable_tls"))]
 pub use unstable_tls::*;
 
@@ -287,9 +304,9 @@ impl Rng {
     /// Creates a fixed value to initialize the TLS.
     pub(crate) const fn fixed_tls() -> Self {
         Self {
-            x: Cell::new(0xad9da80ff4906d64),
-            y: Cell::new(0xd90576ebc62161ca),
-            z: Cell::new(0xbf0f8ca2e79b4817),
+            x: Cell::new(0xAD9DA80FF4906D64),
+            y: Cell::new(0xD90576EBC62161CA),
+            z: Cell::new(0xBF0F8CA2E79B4817),
             seed_source: Cell::new(SeedSource::Fixed),
         }
     }

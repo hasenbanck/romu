@@ -31,6 +31,40 @@ Example chances for getting a "too small" period:
 You can read more about the theory behind Romu in the [official paper](https://arxiv.org/abs/2002.11331) and it's unique
 selling points on the [official website](https://www.romu-random.org/) of the original author.
 
+## Seeding
+
+When the user calls the `new()` or `default()` functions of a generator, the implementation
+tries to use the best available randomness source to seed the generator (in the following order):
+ 1. The crate `getrandom` to seed from a high quality randomness source of the operating system.
+    The feature `getrandom` must be activated for this.
+ 2. Use the functionality of the standard library to create a low quality randomness seed (using
+    the current time, the thread ID and a memory address).
+    The feature `std` must be activated for this.
+ 3. Use a memory address as a very low randomness seed. If Address Space Layout Randomization
+    (ASLR) is supported by the operating system, this should be a pretty "random" value.
+
+It is highly recommended using the `no_std` compatible `getrandom` feature to get high quality
+randomness seeds.
+
+The user can always create / update a generator with a user provided seed value.
+
+If the `tls` feature is used, the user should call the `seed()` function to seed the TLS
+before creating the first random numbers, since the TLS instance is instantiated with a fixed
+value.
+
+## SIMD
+
+The crate currently provides three generators that tries to use auto vectorization to speed up
+the generation of large amounts of random numbers.
+
+ * `Rng128` - This should be used when the processor has access to 128-bit SIMD (SSE2 / NEON).
+ * `Rng256` - This should be used when the processor has access to 256-bit SIMD (AVX2).
+ * `Rng512` - This should be used when the processor has access to 512-bit SIMD (AVX512).
+
+The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD.
+Users should test the available generators for their workload and verify if they can accelerate them
+using the SIMD functionality.
+
 ## Features
 
 The crate is `no_std` compatible.
@@ -43,25 +77,6 @@ The crate is `no_std` compatible.
                     thread local functions greatly. 
  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD versions of the
                      generator which can be used to create large amount of random data fast.
-
-## SIMD
-
-The `unstable_simd` feature activates the types `Rng128`, `Rng256`, `Rng512` for 2 lane, 4 lane and 8 lane SIMD
-respectively. From my limited testing it seems that speed improvements can only be seen once AVX2 is activated and 
-at least "Rng256" is used:
-
-```bash
-bytes/Copy/1048576      time:   [34.508 us 35.437 us 36.277 us]
-                        thrpt:  [26.919 GiB/s 27.558 GiB/s 28.300 GiB/s]
-bytes/Rng/1048576       time:   [76.342 us 76.462 us 76.595 us]
-                        thrpt:  [12.750 GiB/s 12.772 GiB/s 12.792 GiB/s]
-bytes/Rng128/1048576    time:   [105.01 us 105.21 us 105.42 us]
-                        thrpt:  [9.2634 GiB/s 9.2824 GiB/s 9.2994 GiB/s]
-bytes/Rng256/1048576    time:   [52.945 us 53.111 us 53.284 us]
-                        thrpt:  [18.327 GiB/s 18.387 GiB/s 18.445 GiB/s]
-bytes/Rng512/1048576    time:   [34.794 us 34.853 us 34.917 us]
-                        thrpt:  [27.968 GiB/s 28.019 GiB/s 28.067 GiB/s]
-```
 
 ## License
 
