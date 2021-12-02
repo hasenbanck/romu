@@ -1,4 +1,4 @@
-# romu - Rust crate
+# romu
 
 [![Documentation](https://docs.rs/romu/badge.svg)](https://docs.rs/romu/)
 [![Crates.io](https://img.shields.io/crates/v/romu.svg)](https://crates.io/crates/romu)
@@ -54,16 +54,22 @@ value.
 
 ## SIMD
 
-The crate currently provides three generators that tries to use auto vectorization to speed up
-the generation of large amounts of random numbers.
+The crate currently provides three fallback generators that try to use auto vectorization to speed up the generation
+for large amount of random numbers. They should provide good results for SIMD extensions of their same size:
 
- * `Rng128` - This should be used when the processor has access to 128-bit SIMD (SSE2 / NEON).
- * `Rng256` - This should be used when the processor has access to 256-bit SIMD (AVX2).
- * `Rng512` - This should be used when the processor has access to 512-bit SIMD (AVX512).
+ * `Rng128` - Generator with a width of 128-bit.
+ * `Rng256` - Generator with a width of 256-bit.
+ * `Rng512` - Generator with a width of 512-bit.
+ 
+Suggested generators for certain CPU SIMD extensions:
+ * AVX2: `Rng512`
+ * NEON: `Rng128`
+ * SSE2: `Rng128`
 
-The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD.
-Users should test the available generators for their workload and verify if they can accelerate them
-using the SIMD functionality.
+AVX2 has special hand-written implementations. With AVX2 enabled and using the `Rng512` generator we reached 28 GiB/s
+on an AMD Ryzen 9 5950X.
+
+The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD generators.
 
 ## Features
 
@@ -75,8 +81,7 @@ The crate is `no_std` compatible.
  * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call times to the
                     thread local functions greatly. 
- * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide special SIMD versions of the
-                     generator which can be used to create large amount of random data fast.
+ * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide the SIMD versions of the generators.
 
 ## License
 

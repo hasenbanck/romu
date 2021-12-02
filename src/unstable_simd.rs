@@ -112,16 +112,14 @@ impl Rng128 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 2 * size_of::<u64>();
-        assert_eq!(size_of::<[u8; CHUNK_SIZE]>(), size_of::<[u64; 2]>());
+        assert!(size_of::<[u64; 2]>() == size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
-            // Safety: Should be safe since we asserted that they are of the same size.
             let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x2()) };
             chunk.copy_from_slice(&data)
         }
 
-        // Safety: Should be safe since we asserted that they are of the same size.
         let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x2()) };
         chunks
             .into_remainder()
@@ -244,16 +242,14 @@ impl Rng256 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 4 * size_of::<u64>();
-        assert_eq!(size_of::<[u8; CHUNK_SIZE]>(), size_of::<[u64; 4]>());
+        assert!(size_of::<[u64; 4]>() == size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
-            // Safety: Should be safe since we asserted that they are of the same size.
             let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x4()) };
             chunk.copy_from_slice(&data)
         }
 
-        // Safety: Should be safe since we asserted that they are of the same size.
         let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x4()) };
         chunks
             .into_remainder()
@@ -421,16 +417,14 @@ impl Rng512 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 8 * size_of::<u64>();
-        assert_eq!(size_of::<[u8; CHUNK_SIZE]>(), size_of::<[u64; 8]>());
+        assert!(size_of::<[u64; 8]>() == size_of::<[u8; CHUNK_SIZE]>());
 
-        // Safety: Should be safe since we asserted that they are of the same size.
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
             let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x8()) };
             chunk.copy_from_slice(&data)
         }
 
-        // Safety: Should be safe since we asserted that they are of the same size.
         let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.u64x8()) };
         chunks
             .into_remainder()
