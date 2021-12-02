@@ -13,9 +13,8 @@ pub struct Rng128 {
     seed_source: SeedSource,
 }
 
-impl Rng128 {
-    /// Creates a new [`Rng128`] with a seed from the best available randomness source.
-    pub fn new() -> Self {
+impl Default for Rng128 {
+    fn default() -> Self {
         let mut rng = Self {
             x: Simd::from_array([0u64; 2]),
             y: Simd::from_array([0u64; 2]),
@@ -23,8 +22,14 @@ impl Rng128 {
             seed_source: SeedSource::Fixed,
         };
         rng.seed();
-
         rng
+    }
+}
+
+impl Rng128 {
+    /// Creates a new [`Rng128`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Re-seeds the [`Rng128`] from the best available randomness source.
@@ -137,9 +142,8 @@ pub struct Rng256 {
     seed_source: SeedSource,
 }
 
-impl Rng256 {
-    /// Creates a new [`Rng256`] with a seed from the best available randomness source.
-    pub fn new() -> Self {
+impl Default for Rng256 {
+    fn default() -> Self {
         let mut rng = Self {
             x: Simd::from_array([0u64; 4]),
             y: Simd::from_array([0u64; 4]),
@@ -147,8 +151,14 @@ impl Rng256 {
             seed_source: SeedSource::Fixed,
         };
         rng.seed();
-
         rng
+    }
+}
+
+impl Rng256 {
+    /// Creates a new [`Rng256`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Re-seeds the [`Rng256`] from the best available randomness source.
@@ -267,9 +277,8 @@ pub struct Rng512 {
     seed_source: SeedSource,
 }
 
-impl Rng512 {
-    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
-    pub fn new() -> Self {
+impl Default for Rng512 {
+    fn default() -> Self {
         let mut rng = Self {
             x: Simd::from_array([0u64; 8]),
             y: Simd::from_array([0u64; 8]),
@@ -277,8 +286,14 @@ impl Rng512 {
             seed_source: SeedSource::Fixed,
         };
         rng.seed();
-
         rng
+    }
+}
+
+impl Rng512 {
+    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Re-seeds the [`Rng512`] from the best available randomness source.

@@ -14,9 +14,8 @@ pub struct Rng512 {
     seed_source: SeedSource,
 }
 
-impl Rng512 {
-    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
-    pub fn new() -> Self {
+impl Default for Rng512 {
+    fn default() -> Self {
         unsafe {
             let mut rng = Self {
                 x: [_mm256_setzero_si256(), _mm256_setzero_si256()],
@@ -25,9 +24,15 @@ impl Rng512 {
                 seed_source: SeedSource::Fixed,
             };
             rng.seed();
-
             rng
         }
+    }
+}
+
+impl Rng512 {
+    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Creates a new [`Rng512`] from the given eight 64-bit seeds.
