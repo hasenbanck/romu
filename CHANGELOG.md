@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 
+## [0.5.0] - 2020-12-02
+### Updated
+- Provides special hand-written AVX2 versions using intrinsics on stable.
+
 ## [0.4.1] - 2020-12-01
 ### Updated
 - Both stable and unstable SIMD generators generate the results.

@@ -8,8 +8,9 @@ license = "Apache-2.0"
 readme = "README.md"
 documentation = "https://docs.rs/romu"
 repository = "https://github.com/hasenbanck/romu/"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
+rust-version = "1.57"
 
 [dependencies]
 getrandom = { version = "0.2", optional = true }
@@ -23,6 +24,16 @@ std = []
 tls = ["std"]
 unstable_tls = ["std", "tls"]
 unstable_simd = []
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = "thin"
+
+[profile.bench]
+opt-level = 3
+codegen-units = 1
+lto = "thin"
 
 [[bench]]
 name = "random"
