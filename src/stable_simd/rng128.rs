@@ -10,9 +10,8 @@ pub struct Rng128 {
     seed_source: SeedSource,
 }
 
-impl Rng128 {
-    /// Creates a new [`Rng128`] with a seed from the best available randomness source.
-    pub fn new() -> Self {
+impl Default for Rng128 {
+    fn default() -> Self {
         let mut rng = Self {
             x: [0u64; 2],
             y: [0u64; 2],
@@ -22,6 +21,13 @@ impl Rng128 {
         rng.seed();
 
         rng
+    }
+}
+
+impl Rng128 {
+    /// Creates a new [`Rng128`] with a seed from the best available randomness source.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Creates a new [`Rng128`] from the given two 64-bit seeds.
