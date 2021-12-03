@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Updated
+
+## [0.5.1] - 2020-12-03
+### Added
 - Add Default implementations for the wide Rng types.
 
 ## [0.5.0] - 2020-12-02

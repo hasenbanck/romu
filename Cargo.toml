@@ -8,7 +8,7 @@ license = "Apache-2.0"
 readme = "README.md"
 documentation = "https://docs.rs/romu"
 repository = "https://github.com/hasenbanck/romu/"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 rust-version = "1.57"
 
@@ -28,12 +28,12 @@ unstable_simd = []
 [profile.release]
 opt-level = 3
 codegen-units = 1
-lto = "thin"
+lto = "fat"
 
 [profile.bench]
 opt-level = 3
 codegen-units = 1
-lto = "thin"
+lto = "fat"
 
 [[bench]]
 name = "random"
