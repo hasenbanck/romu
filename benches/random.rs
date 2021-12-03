@@ -269,6 +269,7 @@ pub fn tls(c: &mut Criterion) {
             rng.fill_bytes(&mut buffer);
         })
     });
+    black_box(buffer);
 
     let mut buffer = vec![0u8; count as usize];
     group.bench_function(BenchmarkId::new("bytes", "thread local"), |b| {
@@ -276,6 +277,7 @@ pub fn tls(c: &mut Criterion) {
             romu::fill_bytes(&mut buffer);
         })
     });
+    black_box(buffer);
 
     group.finish();
 }
