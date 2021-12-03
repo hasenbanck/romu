@@ -44,6 +44,7 @@ impl Rng256 {
         let lane2 = split_mix_64(seeds[2]);
         let lane3 = split_mix_64(seeds[3]);
 
+        assert!(size_of::<__m256i>() == size_of::<[u64; 4]>());
         unsafe {
             Self {
                 x: transmute([lane0[0], lane1[0], lane2[0], lane3[0]]),
