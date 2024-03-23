@@ -99,7 +99,7 @@ impl Rng128 {
         let yp = self.y;
         let zp = self.z;
 
-        self.x = zp * 0xD3833E804F4C574B;
+        self.x = zp * u64x2::splat(0xD3833E804F4C574B);
         let y = yp - xp;
         self.y = y << 12 | y >> 52;
         let z = zp - yp;
@@ -117,7 +117,7 @@ impl Rng128 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 2 * size_of::<u64>();
-        assert!(size_of::<[u64; 2]>() == size_of::<[u8; CHUNK_SIZE]>());
+        assert_eq!(size_of::<[u64; 2]>(), size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
@@ -234,7 +234,7 @@ impl Rng256 {
         let yp = self.y;
         let zp = self.z;
 
-        self.x = zp * 0xD3833E804F4C574B;
+        self.x = zp * u64x4::splat(0xD3833E804F4C574B);
         let y = yp - xp;
         self.y = y << 12 | y >> 52;
         let z = zp - yp;
@@ -252,7 +252,7 @@ impl Rng256 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 4 * size_of::<u64>();
-        assert!(size_of::<[u64; 4]>() == size_of::<[u8; CHUNK_SIZE]>());
+        assert_eq!(size_of::<[u64; 4]>(), size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
@@ -414,7 +414,7 @@ impl Rng512 {
         let yp = self.y;
         let zp = self.z;
 
-        self.x = zp * 0xD3833E804F4C574B;
+        self.x = zp * u64x8::splat(0xD3833E804F4C574B);
         let y = yp - xp;
         self.y = y << 12 | y >> 52;
         let z = zp - yp;
@@ -432,7 +432,7 @@ impl Rng512 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 8 * size_of::<u64>();
-        assert!(size_of::<[u64; 8]>() == size_of::<[u8; CHUNK_SIZE]>());
+        assert_eq!(size_of::<[u64; 8]>(), size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {

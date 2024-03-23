@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 
+## [0.6.0] - 2024-03-23
+### Updated
+- Make unstable_simd compatible with the current nightly release.
+
 ## [0.5.1] - 2020-12-03
 ### Added
 - Add Default implementations for the wide Rng types.
