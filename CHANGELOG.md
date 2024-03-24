@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Updated
 - Only provide one wide generator and provide a SSE2 version.
+- Raised minimal supported Rust version.
 
 ## [0.6.0] - 2024-03-23
 ### Updated
