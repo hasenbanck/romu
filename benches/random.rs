@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use romu::{Rng, Rng128, Rng256, Rng512};
+use romu::{Rng, RngWide};
 
 pub fn scalar(c: &mut Criterion) {
     let mut group = c.benchmark_group("scalar");
@@ -207,30 +207,12 @@ pub fn bytes(c: &mut Criterion) {
         b.iter(|| rng.fill_bytes(&mut buffer));
     });
     black_box(buffer);
-
-    let mut rng = Rng128::new();
-
-    let mut buffer = vec![0u8; size];
-
-    group.bench_with_input(BenchmarkId::new("Rng128", size), &size, |b, &_s| {
-        b.iter(|| rng.fill_bytes(&mut buffer));
-    });
-    black_box(buffer);
-
-    let mut rng = Rng256::new();
+    
+    let mut rng = RngWide::new();
 
     let mut buffer = vec![0u8; size];
 
-    group.bench_with_input(BenchmarkId::new("Rng256", size), &size, |b, &_s| {
-        b.iter(|| rng.fill_bytes(&mut buffer));
-    });
-    black_box(buffer);
-
-    let mut rng = Rng512::new();
-
-    let mut buffer = vec![0u8; size];
-
-    group.bench_with_input(BenchmarkId::new("Rng512", size), &size, |b, &_s| {
+    group.bench_with_input(BenchmarkId::new("RngWide", size), &size, |b, &_s| {
         b.iter(|| rng.fill_bytes(&mut buffer));
     });
     black_box(buffer);
@@ -283,8 +265,8 @@ pub fn tls(c: &mut Criterion) {
 }
 
 #[cfg(feature = "tls")]
-criterion_group!(benches, scalar, mod_u, range, bytes, tls);
+criterion_group!(benches, bytes);
 #[cfg(not(feature = "tls"))]
-criterion_group!(benches, scalar, mod_u, range, bytes);
+criterion_group!(benches, bytes);
 
 criterion_main!(benches);

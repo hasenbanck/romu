@@ -7,14 +7,14 @@ use core::mem::{size_of, transmute};
 use crate::{generate_seed, split_mix_64, SeedSource};
 
 /// Implements `RomuTrio` with 512-bit width.
-pub struct Rng512 {
+pub struct RngWide {
     x: [__m256i; 2],
     y: [__m256i; 2],
     z: [__m256i; 2],
     seed_source: SeedSource,
 }
 
-impl Default for Rng512 {
+impl Default for RngWide {
     fn default() -> Self {
         unsafe {
             let mut rng = Self {
@@ -29,13 +29,13 @@ impl Default for Rng512 {
     }
 }
 
-impl Rng512 {
-    /// Creates a new [`Rng512`] with a seed from the best available randomness source.
+impl RngWide {
+    /// Creates a new [`RngWide`] with a seed from the best available randomness source.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Creates a new [`Rng512`] from the given eight 64-bit seeds.
+    /// Creates a new [`RngWide`] from the given eight 64-bit seeds.
     ///
     /// The seeds should be from a high randomness source.
     pub const fn from_seed_with_64bit(seeds: [u64; 8]) -> Self {
@@ -68,11 +68,11 @@ impl Rng512 {
         }
     }
 
-    /// Creates a new [`Rng512`] from the given eight 192-bit seeds.
+    /// Creates a new [`RngWide`] from the given eight 192-bit seeds.
     ///
     /// The seeds should be from a high randomness source.
     ///
-    /// If the seeds are of low quality, user should call [`Rng512::mix()`] to improve the quality of the
+    /// If the seeds are of low quality, user should call [`RngWide::mix()`] to improve the quality of the
     /// first couple of random numbers.
     ///
     /// # Notice
@@ -107,7 +107,7 @@ impl Rng512 {
         });
     }
 
-    /// Re-seeds the [`Rng512`] from the best available randomness source.
+    /// Re-seeds the [`RngWide`] from the best available randomness source.
     pub fn seed(&mut self) {
         let mut memory_address = self as *const _ as u64;
         let mut seed_source = SeedSource::Fixed;
@@ -208,7 +208,6 @@ impl Rng512 {
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 8 * size_of::<u64>();
-        assert!(size_of::<[u64; 8]>() == size_of::<[u8; CHUNK_SIZE]>());
 
         let mut chunks = slice.chunks_exact_mut(CHUNK_SIZE);
         for chunk in &mut chunks {
@@ -216,6 +215,7 @@ impl Rng512 {
             chunk.copy_from_slice(&data);
         }
 
+        assert!(size_of::<[u8; CHUNK_SIZE]>() == size_of::<[u64; 8]>());
         let data: [u8; CHUNK_SIZE] = unsafe { transmute(self.next()) };
         chunks
             .into_remainder()

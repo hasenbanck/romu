@@ -19,9 +19,9 @@
 //! ```
 //!
 //! Example chances for getting a "too small" period:
-//!   * When 2^62 * 64 bit numbers are needed (32 EiB) -> 2^-122 chance
-//!   * When 2^39 * 64 bit numbers are needed (4 TiB) -> 2^-146 chance
-//!   * When 2^36 * 64 bit numbers are needed (512 GiB) -> 2^-149 chance
+//!   * When 2^62 * 64-bit numbers are needed (32 EiB) -> 2^-122 chance
+//!   * When 2^39 * 64-bit numbers are needed (4 TiB) -> 2^-146 chance
+//!   * When 2^36 * 64-bit numbers are needed (512 GiB) -> 2^-149 chance
 //!
 //! You can read more about the theory behind Romu in the [official paper](https://arxiv.org/abs/2002.11331)
 //! and it's unique selling points on the [official website](https://www.romu-random.org/) of the
@@ -50,16 +50,13 @@
 //!
 //! ## SIMD
 //!
-//! The crate currently provides three generators that tries to use auto vectorization to speed up
-//! the generation of large amounts of random numbers.
+//! The crate provides a wide generator that tries to speed up the generation for large amount of
+//! random numbers by trying to utilize SIMD instructions.
+//! 
+//! Handwritten NEON, SSE2 and AVX2 implementations are available. A fallback is provided but won't
+//! produce auto vectorized code.
 //!
-//!  * `Rng128` - This should be used when the processor has access to 128-bit SIMD (SSE2 / NEON).
-//!  * `Rng256` - This should be used when the processor has access to 256-bit SIMD (AVX2).
-//!  * `Rng512` - This should be used when the processor has access to 512-bit SIMD (AVX512).
-//!
-//! The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD.
-//! Users should test the available generators for their workload and verify if they can accelerate
-//! them using the SIMD functionality.
+//! The nightly only feature `unstable_simd` uses the `core::simd` crate to implement the SIMD.
 //!
 //! ## Features
 //!
@@ -71,9 +68,8 @@
 //!  * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
 //!  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call
 //!                     times to the thread local functions greatly.
-//!  * `unstable_simd` - Uses the unstable `core::simd` crate of Rust nightly to provide special SIMD
-//!                      versions of the generator which can be used to create large amount of
-//!                      random data fast.
+//!  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide the SIMD
+//!                      version of the wide generator.
 #![warn(missing_docs)]
 #![deny(clippy::unwrap_used)]
 #![cfg_attr(feature = "unstable_tls", feature(thread_local))]
@@ -556,7 +552,7 @@ impl Rng {
     /// This has a very slight bias. Use [`Rng::range_u64()`] instead for no bias.
     #[inline(always)]
     pub fn mod_u64(&self, n: u64) -> u64 {
-        (self.next() as u64 as u128)
+        (self.next() as u128)
             .wrapping_mul(n as u128)
             .wrapping_shr(64) as u64
     }
@@ -592,7 +588,7 @@ impl Rng {
     /// This has a very slight bias. Use [`Rng::range_usize()`] instead for no bias.
     #[inline(always)]
     pub fn mod_usize(&self, n: usize) -> usize {
-        (self.next() as u64 as u128)
+        (self.next() as u128)
             .wrapping_mul(n as u128)
             .wrapping_shr(64) as usize
     }
@@ -865,52 +861,10 @@ mod tests {
 
         assert_ne!(org_bytes, bytes);
     }
-
+    
     #[test]
-    fn test_rng128() {
-        let mut rng = Rng128::from_seed_with_64bit([42, 43]);
-        rng.mix();
-
-        let rng0 = Rng::from_seed_with_64bit(42);
-        rng0.mix();
-
-        let rng1 = Rng::from_seed_with_64bit(43);
-        rng1.mix();
-
-        let res = rng.u64x2();
-
-        assert_eq!(res[0], rng0.u64());
-        assert_eq!(res[1], rng1.u64());
-    }
-
-    #[test]
-    fn test_rng256() {
-        let mut rng = Rng256::from_seed_with_64bit([42, 43, 44, 45]);
-        rng.mix();
-
-        let rng0 = Rng::from_seed_with_64bit(42);
-        rng0.mix();
-
-        let rng1 = Rng::from_seed_with_64bit(43);
-        rng1.mix();
-
-        let rng2 = Rng::from_seed_with_64bit(44);
-        rng2.mix();
-
-        let rng3 = Rng::from_seed_with_64bit(45);
-        rng3.mix();
-
-        let res = rng.u64x4();
-
-        assert_eq!(res[0], rng0.u64());
-        assert_eq!(res[1], rng1.u64());
-        assert_eq!(res[2], rng2.u64());
-        assert_eq!(res[3], rng3.u64());
-    }
-
-    #[test]
-    fn test_rng512() {
-        let mut rng = Rng512::from_seed_with_64bit([42, 43, 44, 45, 46, 47, 48, 49]);
+    fn test_rng_wide() {
+        let mut rng = RngWide::from_seed_with_64bit([42, 43, 44, 45, 46, 47, 48, 49]);
         rng.mix();
 
         let rng0 = Rng::from_seed_with_64bit(42);

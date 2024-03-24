@@ -54,41 +54,29 @@ value.
 
 ## SIMD
 
-The crate currently provides three wide generators that try to speed up the generation for large amount
-of random numbers.
+The crate provides a wide generator that tries to speed up the generation for large amount of random numbers by trying
+to utilize SIMD instructions.
 
- * `Rng128` - Generator with a width of 128-bit.
- * `Rng256` - Generator with a width of 256-bit.
- * `Rng512` - Generator with a width of 512-bit.
- 
-The fallbacks will not produce auto vectorized code and are only useful to better utilize the CPU pipeline.
-Using `Rng128` will result in a throughput improvement when filling a byte slice though (AMD Ryzen 9 5950X):
+Handwritten SSE2 and AVX2 implementations are available. A fallback is provided but won't produce auto
+vectorized code.
 
+The nightly only feature `unstable_simd` uses the `core::simd` crate to implement the wide generator.
+
+SSE2 benchmark:
 ```
-bytes/Rng/1048576       time:   [75.418 us 75.578 us 75.751 us]
-                        thrpt:  [12.892 GiB/s 12.921 GiB/s 12.949 GiB/s]
-bytes/Rng128/1048576    time:   [57.103 us 57.384 us 57.711 us]
-                        thrpt:  [16.921 GiB/s 17.018 GiB/s 17.102 GiB/s]
-```
-
-Hand-written SSE2 generators don't improve the throughput since they can't calculate a 64-bit multiplication
-in one instruction and need multiple 32-bit multiplications instead and are not wide enough to compensate.
-
-AVX2 though has special hand-written implementations for `Rng256` and `Rng512` which greatly improve the
-throughput (AMD Ryzen 9 5950X):
-
-```
-bytes/Rng/1048576       time:   [75.774 us 76.037 us 76.313 us]
-                        thrpt:  [12.797 GiB/s 12.843 GiB/s 12.888 GiB/s]
-bytes/Rng128/1048576    time:   [56.840 us 57.031 us 57.251 us]
-                        thrpt:  [17.057 GiB/s 17.123 GiB/s 17.181 GiB/s]
-bytes/Rng256/1048576    time:   [54.443 us 54.562 us 54.680 us]
-                        thrpt:  [17.859 GiB/s 17.898 GiB/s 17.937 GiB/s]
-bytes/Rng512/1048576    time:   [35.528 us 35.618 us 35.721 us]
-                        thrpt:  [27.338 GiB/s 27.418 GiB/s 27.487 GiB/s]
+bytes/Rng/1048576       time:   [73.299 µs 73.359 µs 73.437 µs]
+                        thrpt:  [13.298 GiB/s 13.312 GiB/s 13.323 GiB/s]
+bytes/RngWide/1048576   time:   [63.837 µs 63.998 µs 64.245 µs]
+                        thrpt:  [15.201 GiB/s 15.259 GiB/s 15.298 GiB/s]
 ```
 
-The nightly only feature `unstable_simd` uses the `core::simd` create to implement the SIMD generators.
+AVX2 benchmark:
+```
+bytes/Rng/1048576       time:   [74.062 µs 74.253 µs 74.519 µs]
+                        thrpt:  [13.105 GiB/s 13.152 GiB/s 13.186 GiB/s]
+bytes/RngWide/1048576   time:   [35.187 µs 35.266 µs 35.375 µs]
+                        thrpt:  [27.606 GiB/s 27.691 GiB/s 27.754 GiB/s]
+```
 
 ## Features
 
@@ -100,8 +88,8 @@ The crate is `no_std` compatible.
  * `getrandom` - Uses the `getrandom` crate to create a seed of high randomness. Enabled by default.
  * `unstable_tls` - Uses the unstable `thread_local` feature of Rust nightly. Improves the call times to the
                     thread local functions greatly. 
- * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide the SIMD versions of the wide
-                     generators.
+ * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide the SIMD version of the wide
+                     generator.
 
 ## License
 
