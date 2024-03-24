@@ -105,7 +105,7 @@ impl RngWide {
     ///
     /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&mut self) {
-        (0..10).into_iter().for_each(|_| {
+        (0..10).for_each(|_| {
             self.next();
         });
     }

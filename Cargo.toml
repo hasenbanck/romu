@@ -10,7 +10,7 @@ documentation = "https://docs.rs/romu"
 repository = "https://github.com/hasenbanck/romu/"
 version = "0.7.0"
 edition = "2021"
-rust-version = "1.57"
+rust-version = "1.74"
 
 [dependencies]
 getrandom = { version = "0.2", optional = true }

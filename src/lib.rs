@@ -52,7 +52,7 @@
 //!
 //! The crate provides a wide generator that tries to speed up the generation for large amount of
 //! random numbers by trying to utilize SIMD instructions.
-//! 
+//!
 //! Handwritten NEON, SSE2 and AVX2 implementations are available. A fallback is provided but won't
 //! produce auto vectorized code.
 //!
@@ -383,7 +383,7 @@ impl Rng {
     ///
     /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&self) {
-        (0..10).into_iter().for_each(|_| {
+        (0..10).for_each(|_| {
             self.next();
         });
     }
@@ -715,6 +715,7 @@ impl Rng {
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
+
     use super::*;
 
     #[test]
@@ -861,7 +862,7 @@ mod tests {
 
         assert_ne!(org_bytes, bytes);
     }
-    
+
     #[test]
     fn test_rng_wide() {
         let mut rng = RngWide::from_seed_with_64bit([42, 43, 44, 45, 46, 47, 48, 49]);

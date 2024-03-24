@@ -18,9 +18,9 @@ impl Default for RngWide {
     fn default() -> Self {
         unsafe {
             let mut rng = Self {
-                x: [_mm_setzero_si128(), _mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()],
-                y: [_mm_setzero_si128(), _mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()],
-                z: [_mm_setzero_si128(), _mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()],
+                x: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
+                y: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
+                z: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
                 seed_source: SeedSource::Fixed,
             };
             rng.seed();
@@ -114,7 +114,7 @@ impl RngWide {
     ///
     /// Should be called when having (re-)seeded the generator with a fixed value of low randomness.
     pub fn mix(&mut self) {
-        (0..10).into_iter().for_each(|_| {
+        (0..10).for_each(|_| {
             self.next();
         });
     }
@@ -177,7 +177,7 @@ impl RngWide {
             let zp_mid_high = _mm_slli_epi64::<32>(zp_mid_high);
             let zp_low = _mm_mul_epu32(low_mul, zp[0]);
             let x0 = _mm_add_epi64(zp_low, zp_mid_high);
-            
+
             let zp_high = _mm_mul_epu32(zp[1], high_mul);
             let zp_high_shift = _mm_srli_epi64::<32>(zp[1]);
             let zp_mid = _mm_mul_epu32(zp_high_shift, low_mul);
@@ -201,14 +201,14 @@ impl RngWide {
             let zp_mid_high = _mm_slli_epi64::<32>(zp_mid_high);
             let zp_low = _mm_mul_epu32(low_mul, zp[3]);
             let x3 = _mm_add_epi64(zp_low, zp_mid_high);
-            
+
             self.x = [x0, x1, x2, x3];
 
             let ty = _mm_sub_epi64(yp[0], xp[0]);
             let srl = _mm_srli_epi64::<52>(ty);
             let sll = _mm_slli_epi64::<12>(ty);
             let y0 = _mm_or_si128(sll, srl);
-            
+
             let ty = _mm_sub_epi64(yp[1], xp[1]);
             let srl = _mm_srli_epi64::<52>(ty);
             let sll = _mm_slli_epi64::<12>(ty);
@@ -223,7 +223,7 @@ impl RngWide {
             let srl = _mm_srli_epi64::<52>(ty);
             let sll = _mm_slli_epi64::<12>(ty);
             let y3 = _mm_or_si128(sll, srl);
-            
+
             self.y = [y0, y1, y2, y3];
 
             let tz = _mm_sub_epi64(zp[0], yp[0]);
@@ -245,7 +245,7 @@ impl RngWide {
             let srl = _mm_srli_epi64::<20>(tz);
             let sll = _mm_slli_epi64::<44>(tz);
             let z3 = _mm_or_si128(sll, srl);
-            
+
             self.z = [z0, z1, z2, z3];
 
             assert!(size_of::<[__m128i; 4]>() == size_of::<[u64; 8]>());
