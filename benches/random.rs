@@ -265,8 +265,8 @@ pub fn tls(c: &mut Criterion) {
 }
 
 #[cfg(feature = "tls")]
-criterion_group!(benches, bytes);
+criterion_group!(benches, scalar, mod_u, range, bytes, tls);
 #[cfg(not(feature = "tls"))]
-criterion_group!(benches, bytes);
+criterion_group!(benches, scalar, mod_u, range, bytes);
 
 criterion_main!(benches);

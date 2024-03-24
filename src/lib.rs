@@ -83,7 +83,7 @@ mod stable_simd;
 mod stable_tls;
 #[cfg(feature = "unstable_simd")]
 mod unstable_simd;
-#[cfg(all(feature = "tls", feature = "unstable_tls"))]
+#[cfg(feature = "unstable_tls")]
 mod unstable_tls;
 
 use core::{
@@ -97,7 +97,7 @@ pub use stable_simd::*;
 pub use stable_tls::*;
 #[cfg(feature = "unstable_simd")]
 pub use unstable_simd::*;
-#[cfg(all(feature = "tls", feature = "unstable_tls"))]
+#[cfg(feature = "unstable_tls")]
 pub use unstable_tls::*;
 
 macro_rules! range_integer {

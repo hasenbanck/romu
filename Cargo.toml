@@ -22,7 +22,7 @@ criterion = "0.5"
 default = ["std", "tls", "getrandom"]
 std = []
 tls = ["std"]
-unstable_tls = ["std", "tls"]
+unstable_tls = ["std"]
 unstable_simd = []
 
 [profile.release]
