@@ -171,6 +171,7 @@ impl RngWide {
     }
 
     /// Fills a mutable `[u8]` slice with random values.
+    #[allow(clippy::manual_bits)]
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 8 * size_of::<u64>();
 

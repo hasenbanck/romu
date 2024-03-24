@@ -3,7 +3,7 @@ use core::ops::RangeBounds;
 use crate::{Rng, SeedSource};
 
 thread_local! {
-    static RNG: Rng = Rng::fixed_tls();
+    static RNG: Rng = const { Rng::fixed_tls() };
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "tls")))]

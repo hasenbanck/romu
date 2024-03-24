@@ -18,9 +18,24 @@ impl Default for RngWide {
     fn default() -> Self {
         unsafe {
             let mut rng = Self {
-                x: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
-                y: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
-                z: [_mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128(), _mm_setzero_si128()],
+                x: [
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                ],
+                y: [
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                ],
+                z: [
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                ],
                 seed_source: SeedSource::Fixed,
             };
             rng.seed();
@@ -260,6 +275,7 @@ impl RngWide {
     }
 
     /// Fills a mutable `[u8]` slice with random values.
+    #[allow(clippy::manual_bits)]
     pub fn fill_bytes(&mut self, slice: &mut [u8]) {
         const CHUNK_SIZE: usize = 8 * size_of::<u64>();
 

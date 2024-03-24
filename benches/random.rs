@@ -207,7 +207,7 @@ pub fn bytes(c: &mut Criterion) {
         b.iter(|| rng.fill_bytes(&mut buffer));
     });
     black_box(buffer);
-    
+
     let mut rng = RngWide::new();
 
     let mut buffer = vec![0u8; size];
