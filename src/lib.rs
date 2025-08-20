@@ -77,6 +77,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+// #[cfg(feature = "rand")]
+mod rand_compatibility;
 #[cfg(not(feature = "unstable_simd"))]
 mod stable_simd;
 #[cfg(all(feature = "tls", not(feature = "unstable_tls")))]
