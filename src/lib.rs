@@ -198,7 +198,7 @@ fn generate_seed(memory_address: u64) -> ([u64; 3], SeedSource) {
 #[allow(unused_variables)]
 fn collect_getrandom_randomness(memory_address: u64) -> ([u64; 3], SeedSource) {
     let mut b = [0u8; 24];
-    match getrandom::getrandom(&mut b) {
+    match getrandom::fill(&mut b) {
         Ok(_) => (
             [
                 u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]),

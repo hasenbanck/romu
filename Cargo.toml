@@ -13,11 +13,11 @@ edition = "2021"
 rust-version = "1.74"
 
 [dependencies]
-getrandom = { version = "0.2", optional = true }
+getrandom = { version = "0.3", optional = true }
 rand_core = { version = "0.9", optional = true }
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.7"
 
 [features]
 default = ["std", "tls", "getrandom"]
