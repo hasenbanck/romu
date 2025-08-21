@@ -66,19 +66,19 @@ impl RngWide {
         assert!(size_of::<[__m128i; 4]>() == size_of::<[[u64; 2]; 4]>());
         unsafe {
             Self {
-                x: transmute([
+                x: transmute::<[[u64; 2]; 4], [std::arch::x86_64::__m128i; 4]>([
                     [lane0[0], lane1[0]],
                     [lane2[0], lane3[0]],
                     [lane4[0], lane5[0]],
                     [lane6[0], lane7[0]],
                 ]),
-                y: transmute([
+                y: transmute::<[[u64; 2]; 4], [std::arch::x86_64::__m128i; 4]>([
                     [lane0[1], lane1[1]],
                     [lane2[1], lane3[1]],
                     [lane4[1], lane5[1]],
                     [lane6[1], lane7[1]],
                 ]),
-                z: transmute([
+                z: transmute::<[[u64; 2]; 4], [std::arch::x86_64::__m128i; 4]>([
                     [lane0[2], lane1[2]],
                     [lane2[2], lane3[2]],
                     [lane4[2], lane5[2]],
@@ -102,19 +102,19 @@ impl RngWide {
         assert!(size_of::<[__m128i; 4]>() == size_of::<[[u64; 2]; 4]>());
         unsafe {
             Self {
-                x: transmute([
+                x: transmute::<[[u64; 2]; 4], [std::arch::x86_64::__m128i; 4]>([
                     [seeds[0][0], seeds[1][0]],
                     [seeds[2][0], seeds[3][0]],
                     [seeds[4][0], seeds[5][0]],
                     [seeds[6][0], seeds[7][0]],
                 ]),
-                y: transmute([
+                y: transmute::<[[u64; 2]; 4], [std::arch::x86_64::__m128i; 4]>([
                     [seeds[0][1], seeds[1][1]],
                     [seeds[2][1], seeds[3][1]],
                     [seeds[4][1], seeds[5][1]],
                     [seeds[6][1], seeds[7][1]],
                 ]),
-                z: transmute([[
+                z: transmute::<[[[u64; 2]; 4]; 1], [std::arch::x86_64::__m128i; 4]>([[
                     [seeds[0][2], seeds[1][2]],
                     [seeds[2][2], seeds[3][2]],
                     [seeds[4][2], seeds[5][2]],
@@ -159,9 +159,9 @@ impl RngWide {
 
         assert!(size_of::<[__m128i; 4]>() == size_of::<[u64; 8]>());
         unsafe {
-            self.x = transmute(x);
-            self.y = transmute(y);
-            self.z = transmute(z);
+            self.x = transmute::<[u64; 8], [std::arch::x86_64::__m128i; 4]>(x);
+            self.y = transmute::<[u64; 8], [std::arch::x86_64::__m128i; 4]>(y);
+            self.z = transmute::<[u64; 8], [std::arch::x86_64::__m128i; 4]>(z);
         }
 
         self.seed_source = seed_source;
