@@ -90,6 +90,7 @@ The crate is `no_std` compatible.
                     thread local functions greatly. 
  * `unstable_simd` - Uses the unstable `std::simd` crate of Rust nightly to provide the SIMD version of the wide
                      generator.
+ * `rand`          - implements `RngCore` for compatibility with the `rand` ecosystem.
 
 ## License
 
