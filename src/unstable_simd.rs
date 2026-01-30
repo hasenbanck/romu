@@ -161,8 +161,8 @@ impl RngWide {
 
     /// Generates eight random u64 values.
     #[inline(always)]
-    pub fn u64x8(&mut self) -> [u64; 8] {
-        Simd::to_array(self.next())
+    pub fn u64x8(&mut self) -> u64x8 {
+        self.next()
     }
 
     /// Fills a mutable `[u8]` slice with random values.
