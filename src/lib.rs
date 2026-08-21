@@ -505,7 +505,7 @@ impl Rng {
 
     /// Fills a mutable `[u8]` slice with random values.
     pub fn fill_bytes(&self, slice: &mut [u8]) {
-        let mut chunks = slice.chunks_exact_mut(8);
+        let mut chunks = <[u8]>::chunks_exact_mut(slice, 8);
         for chunk in &mut chunks {
             chunk.copy_from_slice(&self.next().to_ne_bytes())
         }
